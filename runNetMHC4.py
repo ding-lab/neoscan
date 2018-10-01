@@ -174,7 +174,8 @@ def run_netMHC4():
         klen=int(ks[x])
 
         cmd = path_to_netMHC4 +' -a '+ allele_strings + ' -l ' + str(klen) + ' ' + all_peptide_file;
-        p = Popen(cmd, shell=True, stdin=PIPE, stdout=PIPE, stderr=STDOUT, close_fds=True)
+        print(cmd)	
+    	p = Popen(cmd, shell=True, stdin=PIPE, stdout=PIPE, stderr=STDOUT, close_fds=True)
         output = p.stdout.read()
         f=open(netMHC4_file,"a")
         f.write(output)
