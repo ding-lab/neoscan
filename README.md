@@ -1,4 +1,5 @@
-# neoantigen-scan 
+# neoantigen-scan: HG38 reference #
+
 ### Song Cao ###
 
 Pipeline for detecting neoantigen from snvs and indels

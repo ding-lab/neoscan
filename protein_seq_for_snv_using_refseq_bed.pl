@@ -239,7 +239,11 @@ if ($error==0)
 	foreach my $chr (sort keys %chr)
 	{
 		print qq!$chr\n!;
-		if (open (IN,"$dir/$chr.fa"))
+        my $chr2=$chr;
+        $chr2=~s/chr//g;
+        my $f_in=$dir."/Homo_sapiens.GRCh38.dna.chromosome.".$chr2.".fa";
+        if (open (IN,"$f_in"))
+#		if (open (IN,"$dir/$chr.fa"))
 		{
 			print qq!opened $chr\n!;
 			my $sequence="";

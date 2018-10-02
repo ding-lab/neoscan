@@ -68,13 +68,16 @@ if (! -d $HOME1."/LSF_DIR_Neo") {
 }
 
 my $lsf_file_dir = $HOME1."/LSF_DIR_Neo";
+
+## hlaminer for genotype, netMHC for neoantigen prediction ##
+
 my $db_hla_abc_cds="/gscmnt/gc2523/dinglab/neoantigen/human_DB/HLA_ABC_CDS.fasta";
 my $hlaminer="/gscmnt/gc2523/dinglab/neoantigen/HLAminer_v1.3.1/bin/HLAminer_song.pl";
 my $hla_nom_p="/gscmnt/gc2523/dinglab/neoantigen/HLAminer_v1.3.1/database/hla_nom_p.txt";
 my $f_allele="/gscmnt/gc2523/dinglab/neoantigen/netMHC-4.0/Linux_x86_64/data/allelelist";
 my $netMHC="/gscmnt/gc2523/dinglab/neoantigen/netMHC-4.0/netMHC";
-my $db_ref_bed="/gscmnt/gc2524/dinglab/PepScan_Runs/BRCA/proteogenomics/databases/refseq_human_20130727_proteome/proteome.bed";
-my $h37_fa="/gscmnt/gc2524/dinglab/PepScan_Runs/BRCA/proteogenomics/databases/genome_human";
+my $db_ref_bed="/gscmnt/gc2518/dinglab/scao/db/refseq_hg38_june29/proteome.bed";
+my $h38_fa="/gscmnt/gc2518/dinglab/scao/db/refseq_hg38_june29";
 my $db_cdna="/gscmnt/gc3027/dinglab/medseq/fasta/human/Homo_sapiens.GRCh37.70.cdna.all.fa";
 my $db_sanger_qs="/gscmnt/gc2523/dinglab/neoantigen/neoantigen-scan/quality_sanger.table.2col.tsv";
 #my $f_h37="/gscmnt/gc2522/dinglab/ref_tophat/bowtie2-index/Homo_sapiens.GRCh37.75";
@@ -218,12 +221,12 @@ sub bsub_fa{
     print FA "f_fa_all=".$sample_full_path."/$sample_name.transcript.fa\n";
     print FA 'if [ -s $f_vcf_snp ]',"\n";
     print FA "then\n";
-    print FA " ".$run_script_path_perl."fasta_seq_for_snv_using_refseq_bed.pl $db_ref_bed $h37_fa \${f_vcf_snp}"."\n";
+    print FA " ".$run_script_path_perl."fasta_seq_for_snv_using_refseq_bed.pl $db_ref_bed $h38_fa \${f_vcf_snp}"."\n";
     print FA "cat \${f_fa_snp_mut} > \${f_fa_all}","\n";
     print FA "fi\n\n";
     print FA 'if [ -s $f_vcf_indel ]',"\n";
     print FA "then\n";
-    print FA " ".$run_script_path_perl."fasta_seq_for_indel_using_refseq_bed.pl $db_ref_bed $h37_fa \${f_vcf_indel}"."\n";
+    print FA " ".$run_script_path_perl."fasta_seq_for_indel_using_refseq_bed.pl $db_ref_bed $h38_fa \${f_vcf_indel}"."\n";
     print FA "cat \${f_fa_indel_mut} >> \${f_fa_all}","\n";
     print FA "fi\n\n";
     print FA "";
@@ -276,12 +279,12 @@ sub bsub_pep{
     print PEP "f_pep_all=".$sample_full_path."/$sample_name.pep.fa\n";
     print PEP 'if [ -s $f_vcf_snp ]',"\n";
     print PEP "then\n";
-    print PEP " ".$run_script_path_perl."protein_seq_for_snv_using_refseq_bed.pl $db_ref_bed $h37_fa \${f_vcf_snp}"."\n";
+    print PEP " ".$run_script_path_perl."protein_seq_for_snv_using_refseq_bed.pl $db_ref_bed $h38_fa \${f_vcf_snp}"."\n";
     print PEP "cat \${f_pep_snp_mut} > \${f_pep_all}","\n";
     print PEP "fi\n\n";
     print PEP 'if [ -s $f_vcf_indel ]',"\n";
     print PEP "then\n";
-    print PEP " ".$run_script_path_perl."protein_seq_for_indel_using_refseq_bed.pl $db_ref_bed $h37_fa \${f_vcf_indel}"."\n";
+    print PEP " ".$run_script_path_perl."protein_seq_for_indel_using_refseq_bed.pl $db_ref_bed $h38_fa \${f_vcf_indel}"."\n";
     print PEP "cat \${f_pep_indel_mut} >> \${f_pep_all}","\n";
     print PEP "fi\n\n";
     print PEP "";
