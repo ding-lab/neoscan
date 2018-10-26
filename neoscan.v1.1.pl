@@ -563,10 +563,10 @@ sub bsub_parsemhc{
     print PMHC "f_out=".$sample_full_path."/$sample_name.neoantigen.tsv\n";
 	print PMHC "f_sum=".$sample_full_path."/$sample_name.neo.summary\n";
 	print PMHC "f_min=".$sample_full_path."/$sample_name.neo.summary.min\n";
-    print PMHC  " ".$run_script_path_perl."parseNetMHC4result.pl \${f_netMHC_result} \${f_indel_wt_fa} \${f_snv_wt_fa} \${f_out}"."\n";
+    #print PMHC  " ".$run_script_path_perl."parseNetMHC4result.pl \${f_netMHC_result} \${f_indel_wt_fa} \${f_snv_wt_fa} \${f_out}"."\n";
     print PMHC	" ".$run_script_path_perl."reportSummary.pl \${f_out} \${f_indel} \${f_snv} \${f_indel_mut_fa} \${f_snv_mut_fa} \${f_sum}"."\n";
-	print PMHC  " ".$run_script_path_perl."get_min_result.pl \${f_sum} \${f_min}"."\n";
-	print PMHC	"rm \${f_netMHC_result}"."\n";
+	#print PMHC  " ".$run_script_path_perl."get_min_result.pl \${f_sum} \${f_min}"."\n";
+	#print PMHC	"rm \${f_netMHC_result}"."\n";
 	close PMHC;
     #$bsub_com = "bsub < $job_files_dir/$current_job_file\n";
     #system ( $bsub_com );
