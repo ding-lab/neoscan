@@ -84,7 +84,10 @@ while(<IN_mhc>)
                 my $id=$temp2[0];
 				my $wt_type=0;
 				## remove if in wild-type
-				if($wt{$id}=~/$pep/) { $wt_type=1; }
+				foreach my $id2 (sort keys %wt) 
+				{
+				if($wt{$id2}=~/$pep/) { $wt_type=1; }
+				}
 	#			if($temp2[1]=~/^i/) { if($iwt{$id}=~/$pep/) { $wt_type=1; }}
 				if($wt_type==0) 
 				{

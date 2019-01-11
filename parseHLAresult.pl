@@ -16,35 +16,20 @@ die $usage unless @ARGV == 2;
 
 my($f_hla_in,$f_hla_out)=@ARGV;
 
-open(IN_hla,"<$f_hla_in");
 #open(IN_smut,"<$f_snv_mut");
 open(OUT,">$f_hla_out"); 
 
-my $print_out=0;
-while(<IN_hla>)
-	{
-		my $line=$_;
-		chomp($line);
-		
-		if($line=~/Prediction \#1/)
-		{
-			$print_out=1; 
-			next; 
-		}
-			
-		if($print_out==1) 
-		{
-			if($line=~/\*/ && (! ($line=~/Prediction/))) 
-			{ 
-				my @temp=split(/\,/,$line);  
-				my $hla=$temp[0];
-			    $hla=~ s/^\s+|\s+$//g;
-				$hla=~ s/\*//g;
-				$hla=~ s/P//g;  	
-				print OUT "HLA-".$hla,"\t",$temp[3],"\n"; }
-			else { $print_out=0; }
-		}
-		}	
-
-close(IN_hla);
+foreach my $l (`cat $f_hla_in`) 
+{ 
+ 	my $ltr=$l; 
+	chomp($ltr); 
+	if($ltr=~/Reads/) { next; } 
+	else { 
+	my @temp=split("\t",$ltr); 
+	for(my $i=1;$i<=6;$i++) 
+	{ 
+	my $hla=$temp[$i]; $hla=~s/\*//g; 
+	print OUT "HLA-".$hla,"\t","1000","\n";  }
+}
+}
 close(OUT);

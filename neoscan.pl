@@ -27,26 +27,30 @@ my $normal = "\e[0m";
 This script will predict neoantigen for somatic variants in cancer sample 
 Pipeline version: $version
 
-$yellow     Usage: perl $0 --rdir --log --bamfq --step  $normal
+$yellow     Usage: perl $0 --rdir --log --bamfq --bed --step --rna --refdir $normal
 
-<r_dir> = full path of the folder holding files for this sequence run
+<rdir> = full path of the folder holding files for this sequence run
 
 <log> = full path of the folder saving log files 
 
 <bamfq> = 1, input is bam; 0, input is fastq: default 1
+
+<rna> =1, input data is rna, otherwise is dna
+
+<bed> = bed file for annotation: ensembl: /gscmnt/gc2518/dinglab/scao/db/ensembl38.85/proteome-first.bed 
+								 refseq: /gscmnt/gc2518/dinglab/scao/db/refseq_hg38_june29/proteome.bed
+ 
+<refdir> = ref directory: /gscmnt/gc2518/dinglab/scao/db/refseq_hg38_june29
  
 <step_number> run this pipeline step by step. (running the whole pipeline if step number is 0)
 
 $red     	[1] Generate fasta snv and indel
 		 	[2] Generate peptide for snv and indel
+$green      [3]  Run HLA type
+$purple		[4]  Run netMHC 
+		    [5] parse netMHC result
+$yellow 	[6] Generate final report
 
-$green      [3]  Run BWA 
-			[4] parse bwa
-
-$purple		[5]  Run netMHC 
-		    [6] parse netMHC result
-$yellow 	[7] get ref read count
-			[8] Generate final report
 $normal
 OUT
 
@@ -56,11 +60,19 @@ my $run_dir="";
 my $log_dir="";
 my $hla = 1; 
 my $s_bam_fq =1; 
+my $s_rna=1; 
 
+my $db_ref_bed="/gscmnt/gc2518/dinglab/scao/db/ensembl38.85/proteome-first.bed";
+#my $db_ref_bed="/gscmnt/gc2518/dinglab/scao/db/refseq_hg38_june29/proteome.bed";
+my $h38_fa="/gscmnt/gc2518/dinglab/scao/db/refseq_hg38_june29";
+ 
 my $status = &GetOptions (
       "step=i" => \$step_number,
 	  "rdir=s" => \$run_dir,
+	  "bed=s" => \$db_ref_bed,
+	  "refdir=s" => \$h38_fa,
  	  "bamfq=i" => \$s_bam_fq,
+	  "rna=i" => \$s_rna,		
       "log=s"  => \$log_dir,
 	  "help" => \$help
     );
@@ -104,8 +116,8 @@ my $db_hla_abc_cds="/gscmnt/gc2523/dinglab/neoantigen/human_DB/HLA_ABC_CDS.fasta
 my $optitype="/gscmnt/gc2518/dinglab/scao/home/tools/anaconda2/bin/OptiTypePipeline.py"; 
 my $f_allele="/gscmnt/gc2523/dinglab/neoantigen/netMHC-4.0/Linux_x86_64/data/allelelist";
 my $netMHC="/gscmnt/gc2523/dinglab/neoantigen/netMHC-4.0/netMHC";
-my $db_ref_bed="/gscmnt/gc2518/dinglab/scao/db/refseq_hg38_june29/proteome.bed";
-my $h38_fa="/gscmnt/gc2518/dinglab/scao/db/refseq_hg38_june29";
+#my $db_ref_bed="/gscmnt/gc2518/dinglab/scao/db/refseq_hg38_june29/proteome.bed";
+#my $h38_fa="/gscmnt/gc2518/dinglab/scao/db/refseq_hg38_june29";
 my $f_opti_config = "/gscmnt/gc2737/ding/neoantigen/mmy_with_sc/rna/config/config.mmy.ini";
  
 #my $db_cdna="/gscmnt/gc3027/dinglab/medseq/fasta/human/Homo_sapiens.GRCh37.70.cdna.all.fa";
@@ -331,16 +343,21 @@ sub bsub_hla{
     my $lsf_err=$lsf_file_dir."/".$current_job_file.".err";
     `rm $lsf_out`;
     `rm $lsf_err`;
-    my $IN_bam = $sample_full_path."/".$sample_name.".rnaseq.bam";
+    my $IN_bam = $sample_full_path."/".$sample_name.".bam";
     my $f_fq_1=$sample_full_path."/".$sample_name.".1.fq";
     my $f_fq_2=$sample_full_path."/".$sample_name.".2.fq";
-#	my $RNASEQ_MT_sam=$sample_full_path."/".$sample_name.".rnaseq.mapped.sam";
+#	my $HLA_MT_sam=$sample_full_path."/".$sample_name.".rnaseq.mapped.sam";
 	my $dir_hla=$sample_full_path."/hla";
+
+	#if(-d $dir_hla) { `rm $dir_hla`; }
+
+	my $f_hla_type=`find $dir_hla -name \'*.tsv\'`;
+	chomp($f_hla_type);
+	print $f_hla_type,"\n"; 
 	
+#	if(-e $f_hla_type) { print "existing \n"; }
 
-	if(-d $dir_hla) { `rm $dir_hla`; }
-
-    if ((! -e $IN_bam) && ((!-e $f_fq_1) || (! -e $f_fq_2))) {#make sure there is a input fasta file 
+    if ((! -e $IN_bam) && ((!-e $f_fq_1) || (! -e $f_fq_2)) && (!-e $f_hla_type)) {#make sure there is a input fasta file 
         print $red,  "&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&\n";
         print "Warning: Died because there is no input bam or fq file for bwa:\n";
         print "File $IN_bam does not exist!\n";
@@ -351,48 +368,91 @@ sub bsub_hla{
     #    print $red, "&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&\n";
      #   die "Warning: Died because $IN_bam is empty!", $normal, "\n\n";
     #}
-    open(RNASEQ, ">$job_files_dir/$current_job_file") or die $!;
+    open(HLA, ">$job_files_dir/$current_job_file") or die $!;
   # my $f_fq_1=$sample_full_path."/".$sample_name.".1.fq";
    # my $f_fq_2=$sample_full_path."/".$sample_name.".2.fq";
-
-    print RNASEQ "#!/bin/bash\n";
-    #print RNASEQ "#BSUB -n 1\n";
-    #print RNASEQ "#BSUB -R \"rusage[mem=30000]\"","\n";
-    #print RNASEQ "#BSUB -M 30000000\n";
-    #print RNASEQ "#BSUB -q ding-lab\n";
-	#print RNASEQ "#BSUB -w \"$hold_job_file\"","\n";
-	#print RNASEQ "#BSUB -o $lsf_file_dir","/","$current_job_file.out\n";
-    #print RNASEQ "#BSUB -e $lsf_file_dir","/","$current_job_file.err\n";
-    #print RNASEQ "#BSUB -J $current_job_file\n";
-
-    print RNASEQ "RNASEQ_IN=".$sample_full_path."/".$sample_name.".rnaseq.bam\n";
-    print RNASEQ "RNASEQ_sorted=".$sample_full_path."/".$sample_name.".rnaseq.sorted\n";
-    print RNASEQ "RNASEQ_sorted_bam=".$sample_full_path."/".$sample_name.".rnaseq.sorted.bam\n";
-    print RNASEQ "HLA_tsv=".$sample_full_path."/HLA_alleles.tsv\n";
-    print RNASEQ "if [ $s_bam_fq -eq 1 ]\n";
-    print RNASEQ "then\n";
-	print RNASEQ 'if [ -f $IN_bam ]',"\n"; # input file exist
-	print RNASEQ "then\n";
-    print RNASEQ "samtools sort -n \${RNASEQ_IN} \${RNASEQ_sorted}","\n";
-	print RNASEQ "samtools view \${RNASEQ_sorted_bam} | perl -ne \'\$l=\$_; \$f_q1=\"$f_fq_1\"; \$f_q2=\"$f_fq_2\"; if(\$first==0) { open(OUT1,\">\$f_q1\"); open(OUT2,\">\$f_q2\");  \$first=1;}  \@ss=split(\"\\t\",\$l); \$flag=\$ss[1]; \$cigar=\$ss[5]; if((\$flag & 0x100) || (\$flag & 0x800) || (\$cigar=~/H/)) { next; } \$id=\$ss[0]; \$seq=\$ss[9]; \$q=\$ss[10];  if(\$id=~/\\/1\$/ || (\$flag & 0x40) ) { \$r1=\$id; \$r1=~s/\\/1\$//g; \$seq1=\$seq; \$q1=\$q; } if(\$id=~/\\/2\$/ || (\$flag & 0x80)) { \$r2=\$id; \$r2=~s/\\/2\$//g; \$seq2=\$seq; \$q2=\$q; } if((\$r1 eq \$r2)) { print OUT1 \"\@\",\$r1,\"/1\",\"\\n\"; print OUT1 \$seq1,\"\\n\"; print OUT1 \"+\",\"\\n\"; print OUT1 \$q1,\"\\n\"; print OUT2 \"\@\",\$r1,\"/2\",\"\\n\"; print OUT2 \$seq2,\"\\n\"; print OUT2 \"+\",\"\\n\"; print OUT2 \$q2,\"\\n\";}\'","\n";
-	print RNASEQ "  fi\n";
-    print RNASEQ "fi\n"; 
-	print RNASEQ 'if [ -f $f_fq_1 ] && [ -f $f_fq_2 ]',"\n"; # input file exist
-    print RNASEQ "then\n";
-	print RNASEQ "perl $optitype -i $f_fq_1 $f_fq_2 -r -c $f_opti_config -v -o $dir_hla"."\n";
-    print RNASEQ  " ".$run_script_path_perl."parseHLAresult.pl $sample_full_path \${HLA_tsv}"."\n";
-	print RNASEQ "rm $f_fq_1","\n";
- 	print RNASEQ "rm $f_fq_2","\n"; 
-	print RNASEQ "  fi\n";
-   	close RNASEQ;
-
+    
+    print HLA "#!/bin/bash\n";
+    #print HLA "#BSUB -n 1\n";
+    #print HLA "#BSUB -R \"rusage[mem=30000]\"","\n";
+    #print HLA "#BSUB -M 30000000\n";
+    #print HLA "#BSUB -q ding-lab\n";
+	#print HLA "#BSUB -w \"$hold_job_file\"","\n";
+	#print HLA "#BSUB -o $lsf_file_dir","/","$current_job_file.out\n";
+    #print HLA "#BSUB -e $lsf_file_dir","/","$current_job_file.err\n";
+    #print HLA "#BSUB -J $current_job_file\n";
+	print HLA "HLA_IN=".$sample_full_path."/".$sample_name.".bam\n";
+    print HLA "HLA_sorted=".$sample_full_path."/".$sample_name.".sorted\n";
+    print HLA "HLA_sorted_bam=".$sample_full_path."/".$sample_name.".sorted.bam\n";
+    print HLA "HLA_tsv=".$sample_full_path."/HLA_alleles.tsv\n";
+    print HLA "f_optitype_hla=".$sample_full_path."/hla/notexisting.tsv\n";
+#	print HLA "dir_hla=".$sample_full_path."/hla\n";
+	print HLA "if [ $s_bam_fq -eq 1 ]\n";
+    print HLA "then\n";
+	print HLA 'if [ -f $IN_bam ]',"\n"; # input file exist
+	print HLA "then\n";
+    print HLA "samtools sort -n \${HLA_IN} \${HLA_sorted}","\n";
+	print HLA "samtools view \${HLA_sorted_bam} | perl -ne \'\$l=\$_; \$f_q1=\"$f_fq_1\"; \$f_q2=\"$f_fq_2\"; if(\$first==0) { open(OUT1,\">\$f_q1\"); open(OUT2,\">\$f_q2\");  \$first=1;}  \@ss=split(\"\\t\",\$l); \$flag=\$ss[1]; \$cigar=\$ss[5]; if((\$flag & 0x100) || (\$flag & 0x800) || (\$cigar=~/H/)) { next; } \$id=\$ss[0]; \$seq=\$ss[9]; \$q=\$ss[10];  if(\$id=~/\\/1\$/ || (\$flag & 0x40) ) { \$r1=\$id; \$r1=~s/\\/1\$//g; \$seq1=\$seq; \$q1=\$q; } if(\$id=~/\\/2\$/ || (\$flag & 0x80)) { \$r2=\$id; \$r2=~s/\\/2\$//g; \$seq2=\$seq; \$q2=\$q; } if((\$r1 eq \$r2)) { print OUT1 \"\@\",\$r1,\"/1\",\"\\n\"; print OUT1 \$seq1,\"\\n\"; print OUT1 \"+\",\"\\n\"; print OUT1 \$q1,\"\\n\"; print OUT2 \"\@\",\$r1,\"/2\",\"\\n\"; print OUT2 \$seq2,\"\\n\"; print OUT2 \"+\",\"\\n\"; print OUT2 \$q2,\"\\n\";}\'","\n";
+	print HLA "  fi\n";
+    print HLA "fi\n"; 
+	print HLA "if [ -f $f_fq_1 ] && [ -f $f_fq_2 ]","\n"; # input file exist
+    print HLA "then\n";
+	print HLA "if [ $s_rna -eq 1 ]\n";
+    print HLA "then\n";
+	
+	print HLA "if [ -d $dir_hla ]","\n";
+    print HLA "then\n";		
+	print HLA "f_optitype_hla=`find $dir_hla -name '*tsv'`","\n";
+	print HLA "fi\n";
+	print HLA "if [ -z \${f_optitype_hla} ] || [ ! -f \${f_optitype_hla} ]\n";
+    print HLA "then\n";
+    print HLA "if [ -d $dir_hla ]","\n";
+    print HLA "then\n";
+    print HLA "rm -rf $dir_hla\n";   
+    print HLA "fi\n";
+	print HLA "$optitype -i $f_fq_1 $f_fq_2 -r -c $f_opti_config -v -o $dir_hla"."\n";
+#	print HLA "done\n";
+    print HLA "fi\n";
+	print HLA "else\n";
+#    print HLA "while [ ! -f \${f_optitype_hla} ]\n";
+#    print HLA "do\n";
+    print HLA "if [ ! -f \${f_optitype_hla} ]\n";
+    print HLA "then\n";
+    print HLA "if [ -d $dir_hla ]","\n";
+    print HLA "then\n";
+	print HLA "rm -rf $dir_hla\n";	
+    print HLA "fi\n";  	
+   	print HLA "$optitype -i $f_fq_1 $f_fq_2 -d -c $f_opti_config -v -o $dir_hla"."\n";
+#    print HLA "done\n";
+	print HLA "  fi\n";	
+    print HLA "  fi\n";	
+    #print HLA  " ".$run_script_path_perl."parseHLAresult.pl \${f_optitype_hla} \${HLA_tsv}"."\n";
+ 	print HLA "if [ -d $dir_hla ]","\n";
+    print HLA "then\n";
+    print HLA "f_optitype_hla=`find $dir_hla -name '*tsv'`","\n";
+    print HLA "fi\n";
+### finish hla type, then delete ##
+	print HLA "if [ ! -z \${f_optitype_hla} ] && [  -f \${f_optitype_hla} ]\n";
+	print HLA "then\n";
+	print HLA "rm \${HLA_sorted_bam}","\n";
+	print HLA "rm $f_fq_1","\n";
+ 	print HLA "rm $f_fq_2","\n"; 
+	print HLA "  fi\n";
+	print HLA "  fi\n";	
+    print HLA "if [ -d $dir_hla ]","\n";
+    print HLA "then\n";
+    print HLA "f_optitype_hla=`find $dir_hla -name '*tsv'`","\n";
+    print HLA "fi\n";
+	print HLA "if [ ! -z \${f_optitype_hla} ] && [  -f \${f_optitype_hla} ]\n";	
+    print HLA "then\n"; 
+ 	print HLA  " ".$run_script_path_perl."parseHLAresult.pl \${f_optitype_hla} \${HLA_tsv}"."\n";
+	print HLA "fi\n";
+   	close HLA;
     my $sh_file=$job_files_dir."/".$current_job_file;
-
-    $bsub_com = "bsub -q research-hpc -n 1 -R \"select[mem>30000] rusage[mem=30000]\" -M 30000000 -a \'docker(registry.gsc.wustl.edu/genome/genome_perl_environment)\' -w \"$hold_job_file\" -o $lsf_out -e $lsf_err sh $sh_file\n";
+    $bsub_com = "bsub -q research-hpc -n 1 -R \"select[mem>60000] rusage[mem=60000]\" -M 60000000 -a \'docker(registry.gsc.wustl.edu/genome/genome_perl_environment)\' -w \"$hold_job_file\" -o $lsf_out -e $lsf_err sh $sh_file\n";
     system ( $bsub_com );
 
-}
-
+	}
 
 sub bsub_netmhc{
 
@@ -420,7 +480,7 @@ sub bsub_netmhc{
    # print MHC "#BSUB -J $current_job_file\n";
    # print MHC "#BSUB -w \"$hold_job_file\"","\n";
 	print MHC "f_pep=".$sample_full_path."/$sample_name.pep.fa\n";
-    print MHC "HLA_tsv=".$sample_full_path."/HLAminer_alleles.tsv\n";
+    print MHC "HLA_tsv=".$sample_full_path."/HLA_alleles.tsv\n";
 	print MHC "f_netMHC_result=".$sample_full_path."/netMHC4.0.out.append.txt\n";
 	print MHC "f_out=".$sample_full_path."/result_neoantigen\n";
     print MHC  " ".$run_script_path_python."runNetMHC4.py -a \${HLA_tsv} -f \${f_pep} -p 8,9,10,11 -o $sample_full_path -n $netMHC -v $f_allele"."\n";
@@ -471,17 +531,12 @@ sub bsub_parsemhc{
     print PMHC "f_out=".$sample_full_path."/$sample_name.neoantigen.tsv\n";
 	print PMHC "f_sum=".$sample_full_path."/$sample_name.neo.summary\n";
 	print PMHC "f_min=".$sample_full_path."/$sample_name.neo.summary.min\n";
-    #print PMHC  " ".$run_script_path_perl."parseNetMHC4result.pl \${f_netMHC_result} \${f_indel_wt_fa} \${f_snv_wt_fa} \${f_out}"."\n";
+  	print PMHC  " ".$run_script_path_perl."parseNetMHC4result.pl \${f_netMHC_result} \${f_indel_wt_fa} \${f_snv_wt_fa} \${f_out}"."\n";
     print PMHC	" ".$run_script_path_perl."reportSummary.pl \${f_out} \${f_indel} \${f_snv} \${f_indel_mut_fa} \${f_snv_mut_fa} \${f_sum}"."\n";
-	#print PMHC  " ".$run_script_path_perl."get_min_result.pl \${f_sum} \${f_min}"."\n";
-	#print PMHC	"rm \${f_netMHC_result}"."\n";
 	close PMHC;
-    #$bsub_com = "bsub < $job_files_dir/$current_job_file\n";
-    #system ( $bsub_com );
     my $sh_file=$job_files_dir."/".$current_job_file;
-   # $bsub_com = "bsub -q research-hpc -n 1 -R \"select[mem>30000] rusage[mem=30000]\" -M 30000000 -a \'docker(registry.gsc.wustl.edu/genome/genome_perl_environment)\' -w $hold_job_file -o $lsf_out -e $lsf_err sh $sh_file\n"; 
+
     $bsub_com = "bsub -q research-hpc -n 1 -R \"select[mem>30000] rusage[mem=30000]\" -M 30000000 -a \'docker(registry.gsc.wustl.edu/genome/genome_perl_environment)\' -w \"$hold_job_file\" -o $lsf_out -e $lsf_err sh $sh_file\n";
-   #$bsub_com = "bsub < $job_files_dir/$current_job_file\n";
     system ( $bsub_com );
 }
 

@@ -292,7 +292,7 @@ if ($error==0)
 						if ($strand=~/\+/) { if ($segment_lengths_extended=~s/([0-9]+)\,$//) { my $temp=$1; $temp+=100; $segment_lengths_extended.="$temp,"; } }
 						else 
 						{
-							if ($segment_lengths_extended=~s/^([0-9]+)\,//) { my $temp=$1; $temp+=100; $segment_lengths_extended="$temp,$segment_lengths_extended,"; }
+						if ($segment_lengths_extended=~s/^([0-9]+)\,//) { my $temp=$1; $temp+=100; $segment_lengths_extended="$temp,$segment_lengths_extended,"; }
 							if ($segment_starts_extended=~s/^([0-9]+)\,//) { my $temp=$1; $temp-=100; $segment_starts_extended="$temp,$segment_starts_extended,"; }
 						}
 					#	print LOG qq!$segment_lengths $segment_lengths_extended   $segment_starts $segment_starts_extended\n!;
@@ -328,6 +328,7 @@ if ($error==0)
 						#$segment_lengths_=$segment_lengths_extended;
 						$segment_starts_=$segment_starts;
 						$segment_lengths_=$segment_lengths;
+
 						if ($segment_starts_=~/^([0-9\-]+)\,/) { $segment_start_first=$1; }
 						while ($segment_starts_=~s/^([0-9\-]+)\,//)
 						{
@@ -347,9 +348,9 @@ if ($error==0)
 									#<STDIN>;
 									if ($vcf_new{"$chr#$j"}=~/\w/ and $vcf_new{"$chr#$j"}!~/^$vcf_old{"$chr#$j"}$/ and length($vcf_new{"$chr#$j"})==length($vcf_old{"$chr#$j"}))
 									{
-										#print "found\n";
-										#print $name,"\n";
-										#print $chr,"\t",$j,"\n"; 
+										print "found\n";
+										print $name,"\n";
+										print $chr,"\t",$j,"\n"; 
 										my $n=substr $seq_,$i,length($vcf_old{"$chr#$j"});
 										$description_.=qq!$chr-$j!;
 										print qq!$chr#$j: $n $vcf_new{"$chr#$j"}\n!;
