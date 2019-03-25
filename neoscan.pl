@@ -116,7 +116,7 @@ my $db_hla_abc_cds="/gscmnt/gc2523/dinglab/neoantigen/human_DB/HLA_ABC_CDS.fasta
 my $optitype="/gscmnt/gc2518/dinglab/scao/home/tools/anaconda2/bin/OptiTypePipeline.py"; 
 my $f_allele="/gscmnt/gc2523/dinglab/neoantigen/netMHC-4.0/Linux_x86_64/data/allelelist";
 my $netMHC="/gscmnt/gc2523/dinglab/neoantigen/netMHC-4.0/netMHC";
-my $samtools="/gscmnt/gc2525/dinglab/rmashl/Software/bin/samtools/1.2/bin/samtools";
+my $samtools="/usr/bin/samtools";
 #my $db_ref_bed="/gscmnt/gc2518/dinglab/scao/db/refseq_hg38_june29/proteome.bed";
 #my $h38_fa="/gscmnt/gc2518/dinglab/scao/db/refseq_hg38_june29";
 my $f_opti_config = "/gscmnt/gc2737/ding/neoantigen/mmy_with_sc/rna/config/config.mmy.ini";
@@ -245,13 +245,13 @@ sub bsub_fa{
     print FA "f_vcf_snp=".$sample_full_path."/$sample_name.snp.vcf\n";
     print FA "f_fa_indel_wt=".$sample_full_path."/$sample_name.indel.vcf.fa-indel-wt.fasta\n";
     print FA "f_fa_indel_mut=".$sample_full_path."/$sample_name.indel.vcf.fa-indel-mut.fasta\n";
-    print FA "f_fa_snp_wt=".$sample_full_path."/$sample_name.snp.vcf.fa-snv-wt.fasta\n";
-    print FA "f_fa_snp_mut=".$sample_full_path."/$sample_name.snp.vcf.fa-snv-mut.fasta\n";
+    print FA "f_fa_snv_wt=".$sample_full_path."/$sample_name.snp.vcf.fa-snv-wt.fasta\n";
+    print FA "f_fa_snv_mut=".$sample_full_path."/$sample_name.snp.vcf.fa-snv-mut.fasta\n";
     print FA "f_fa_all=".$sample_full_path."/$sample_name.transcript.fa\n";
     print FA 'if [ -s $f_vcf_snp ]',"\n";
     print FA "then\n";
     print FA " ".$run_script_path_perl."fasta_seq_for_snv_using_refseq_bed.pl $db_ref_bed $h38_fa \${f_vcf_snp}"."\n";
-    print FA "cat \${f_fa_snp_mut} > \${f_fa_all}","\n";
+    print FA "cat \${f_fa_snv_mut} > \${f_fa_all}","\n";
     print FA "fi\n\n";
     print FA 'if [ -s $f_vcf_indel ]',"\n";
     print FA "then\n";
@@ -303,13 +303,13 @@ sub bsub_pep{
     print PEP "f_vcf_snp=".$sample_full_path."/$sample_name.snp.vcf\n";
     print PEP "f_pep_indel_wt=".$sample_full_path."/$sample_name.indel.vcf.proteome-indel-wt.fasta\n";
     print PEP "f_pep_indel_mut=".$sample_full_path."/$sample_name.indel.vcf.proteome-indel-mut.fasta\n";
-    print PEP "f_pep_snp_wt=".$sample_full_path."/$sample_name.snp.vcf.proteome-snv-wt.fasta\n";
-    print PEP "f_pep_snp_mut=".$sample_full_path."/$sample_name.snp.vcf.proteome-snv-mut.fasta\n";
-    print PEP "f_pep_all=".$sample_full_path."/$sample_name.pep.fa\n";
+    print PEP "f_pep_snv_wt=".$sample_full_path."/$sample_name.snp.vcf.proteome-snv-wt.fasta\n";
+    print PEP "f_pep_snv_mut=".$sample_full_path."/$sample_name.snp.vcf.proteome-snv-mut.fasta\n";
+    #print PEP "f_pep_all=".$sample_full_path."/$sample_name.pep.fa\n";
     print PEP 'if [ -s $f_vcf_snp ]',"\n";
     print PEP "then\n";
     print PEP " ".$run_script_path_perl."protein_seq_for_snv_using_refseq_bed.pl $db_ref_bed $h38_fa \${f_vcf_snp}"."\n";
-    print PEP "cat \${f_pep_snp_mut} > \${f_pep_all}","\n";
+    #print PEP "cat \${f_pep_snv_mut} > \${f_pep_all}","\n";
     print PEP "fi\n\n";
     print PEP 'if [ -s $f_vcf_indel ]',"\n";
     print PEP "then\n";
@@ -392,15 +392,14 @@ sub bsub_hla{
     print HLA "then\n";
 	print HLA 'if [ -f $IN_bam ]',"\n"; # input file exist
 	print HLA "then\n";
-    print HLA "$samtools sort -n \${HLA_IN} -o \${HLA_sorted_bam}","\n";
+    print HLA "$samtools sort -n \${HLA_IN} \${HLA_sorted}","\n";
 	print HLA "$samtools view \${HLA_sorted_bam} | perl -ne \'\$l=\$_; \$f_q1=\"$f_fq_1\"; \$f_q2=\"$f_fq_2\"; if(\$first==0) { open(OUT1,\">\$f_q1\"); open(OUT2,\">\$f_q2\");  \$first=1;}  \@ss=split(\"\\t\",\$l); \$flag=\$ss[1]; \$cigar=\$ss[5]; if((\$flag & 0x100) || (\$flag & 0x800) || (\$cigar=~/H/)) { next; } \$id=\$ss[0]; \$seq=\$ss[9]; \$q=\$ss[10];  if(\$id=~/\\/1\$/ || (\$flag & 0x40) ) { \$r1=\$id; \$r1=~s/\\/1\$//g; \$seq1=\$seq; \$q1=\$q; } if(\$id=~/\\/2\$/ || (\$flag & 0x80)) { \$r2=\$id; \$r2=~s/\\/2\$//g; \$seq2=\$seq; \$q2=\$q; } if((\$r1 eq \$r2)) { print OUT1 \"\@\",\$r1,\"/1\",\"\\n\"; print OUT1 \$seq1,\"\\n\"; print OUT1 \"+\",\"\\n\"; print OUT1 \$q1,\"\\n\"; print OUT2 \"\@\",\$r1,\"/2\",\"\\n\"; print OUT2 \$seq2,\"\\n\"; print OUT2 \"+\",\"\\n\"; print OUT2 \$q2,\"\\n\";}\'","\n";
 	print HLA "  fi\n";
     print HLA "fi\n"; 
 	print HLA "if [ -f $f_fq_1 ] && [ -f $f_fq_2 ]","\n"; # input file exist
     print HLA "then\n";
 	print HLA "if [ $s_rna -eq 1 ]\n";
-    print HLA "then\n";
-	
+    print HLA "then\n";	
 	print HLA "if [ -d $dir_hla ]","\n";
     print HLA "then\n";		
 	print HLA "f_optitype_hla=`find $dir_hla -name '*tsv'`","\n";
@@ -480,11 +479,24 @@ sub bsub_netmhc{
    # print MHC "#BSUB -e $lsf_file_dir","/","$current_job_file.err\n";
    # print MHC "#BSUB -J $current_job_file\n";
    # print MHC "#BSUB -w \"$hold_job_file\"","\n";
-	print MHC "f_pep=".$sample_full_path."/$sample_name.pep.fa\n";
+    print MHC "f_pep_indel_wt=".$sample_full_path."/$sample_name.indel.vcf.proteome-indel-wt.fasta\n";
+    print MHC "f_pep_indel_mut=".$sample_full_path."/$sample_name.indel.vcf.proteome-indel-mut.fasta\n";
+    print MHC "f_pep_snv_wt=".$sample_full_path."/$sample_name.snp.vcf.proteome-snv-wt.fasta\n";
+    print MHC "f_pep_snv_mut=".$sample_full_path."/$sample_name.snp.vcf.proteome-snv-mut.fasta\n";
+	print MHC "f_pep_snv_mut_v1=".$sample_full_path."/$sample_name.snp.vcf.proteome-snv-mut.v1.fasta\n";		
+	print MHC "f_pep_snv_mut_v2=".$sample_full_path."/$sample_name.snp.vcf.proteome-snv-mut.v2.fasta\n";		
+#	print MHC "f_pep=".$sample_full_path."/$sample_name.pep.fa\n";
     print MHC "HLA_tsv=".$sample_full_path."/HLA_alleles.tsv\n";
 	print MHC "f_netMHC_result=".$sample_full_path."/netMHC4.0.out.append.txt\n";
+	print MHC "f_netMHC_result_snv=".$sample_full_path."/netMHC4.0.out.append.snv.txt\n";
+	print MHC "f_netMHC_result_indel=".$sample_full_path."/netMHC4.0.out.append.indel.txt\n";
 	print MHC "f_out=".$sample_full_path."/result_neoantigen\n";
-    print MHC  " ".$run_script_path_python."runNetMHC4.py -a \${HLA_tsv} -f \${f_pep} -p 8,9,10,11 -o $sample_full_path -n $netMHC -v $f_allele"."\n";
+ 	print MHC " ".$run_script_path_perl."generate_mut_peptide_snv.pl $db_ref_bed \${f_pep_snv_wt} \${f_pep_snv_mut} \${f_pep_snv_mut_v1}\n";
+	print MHC " ".$run_script_path_perl."remove_duplicate_mut_peptide_snv.pl \${f_pep_snv_mut_v1} \${f_pep_snv_mut_v2}\n";
+    print MHC  " ".$run_script_path_python."runNetMHC4.py -a \${HLA_tsv} -f \${f_pep_snv_mut_v2} -p 8,9,10,11 -o $sample_full_path -n $netMHC -v $f_allele"."\n";
+	print MHC "mv \${f_netMHC_result} \${f_netMHC_result_snv}\n"; 
+	print MHC  " ".$run_script_path_python."runNetMHC4.py -a \${HLA_tsv} -f \${f_pep_indel_mut} -p 8,9,10,11 -o $sample_full_path -n $netMHC -v $f_allele"."\n";
+	print MHC "mv \${f_netMHC_result} \${f_netMHC_result_indel}\n";
     close MHC;
 
     my $sh_file=$job_files_dir."/".$current_job_file;
@@ -528,12 +540,17 @@ sub bsub_parsemhc{
 	print PMHC "f_snv_wt_fa=".$sample_full_path."/$sample_name.snp.vcf.proteome-snv-wt.fasta\n";
     print PMHC "f_indel_mut_fa=".$sample_full_path."/$sample_name.indel.vcf.proteome-indel-mut.fasta\n";
     print PMHC "f_snv_mut_fa=".$sample_full_path."/$sample_name.snp.vcf.proteome-snv-mut.fasta\n";
-    print PMHC "f_netMHC_result=".$sample_full_path."/netMHC4.0.out.append.txt\n";
-    print PMHC "f_out=".$sample_full_path."/$sample_name.neoantigen.tsv\n";
-	print PMHC "f_sum=".$sample_full_path."/$sample_name.neo.summary\n";
-	print PMHC "f_min=".$sample_full_path."/$sample_name.neo.summary.min\n";
-  	print PMHC  " ".$run_script_path_perl."parseNetMHC4result.pl \${f_netMHC_result} \${f_indel_wt_fa} \${f_snv_wt_fa} \${f_out}"."\n";
-    print PMHC	" ".$run_script_path_perl."reportSummary.pl \${f_out} \${f_indel} \${f_snv} \${f_indel_mut_fa} \${f_snv_mut_fa} \${f_sum}"."\n";
+    print PMHC "f_netMHC_result_snv=".$sample_full_path."/netMHC4.0.out.append.snv.txt\n";
+	print PMHC "f_netMHC_result_indel=".$sample_full_path."/netMHC4.0.out.append.indel.txt\n";
+    print PMHC "f_snv_out=".$sample_full_path."/$sample_name.neoantigen.snv.tsv\n";
+	print PMHC "f_indel_out=".$sample_full_path."/$sample_name.neoantigen.indel.tsv\n";
+	print PMHC "f_snv_sum=".$sample_full_path."/$sample_name.neo.snv.summary\n";
+	print PMHC "f_indel_sum=".$sample_full_path."/$sample_name.neo.indel.summary\n";
+#	print PMHC "f_min=".$sample_full_path."/$sample_name.neo.summary.min\n";
+  	print PMHC  " ".$run_script_path_perl."parseNetMHC4result.pl \${f_netMHC_result_snv} \${f_indel_wt_fa} \${f_snv_wt_fa} \${f_snv_out}"."\n";
+    print PMHC	" ".$run_script_path_perl."reportSummary.pl \${f_snv_out} \${f_indel} \${f_snv} \${f_indel_mut_fa} \${f_snv_mut_fa} \${f_snv_sum}"."\n";
+	print PMHC  " ".$run_script_path_perl."parseNetMHC4result.pl \${f_netMHC_result_indel} \${f_indel_wt_fa} \${f_snv_wt_fa} \${f_indel_out}"."\n";
+    print PMHC  " ".$run_script_path_perl."reportSummary.pl \${f_indel_out} \${f_indel} \${f_snv} \${f_indel_mut_fa} \${f_snv_mut_fa} \${f_indel_sum}"."\n";
 	close PMHC;
     my $sh_file=$job_files_dir."/".$current_job_file;
 
