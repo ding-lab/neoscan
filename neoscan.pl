@@ -314,7 +314,7 @@ sub bsub_pep{
     print PEP 'if [ -s $f_vcf_indel ]',"\n";
     print PEP "then\n";
     print PEP " ".$run_script_path_perl."protein_seq_for_indel_using_refseq_bed.pl $db_ref_bed $h38_fa \${f_vcf_indel}"."\n";
-    print PEP "cat \${f_pep_indel_mut} >> \${f_pep_all}","\n";
+   # print PEP "cat \${f_pep_indel_mut} >> \${f_pep_all}","\n";
     print PEP "fi\n\n";
     print PEP "";
     close PEP;
