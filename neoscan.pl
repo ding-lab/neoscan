@@ -49,7 +49,6 @@ $red     	[1] Generate fasta snv and indel
 $green      [3]  Run HLA type
 $purple		[4]  Run netMHC 
 		    [5] parse netMHC result
-$yellow 	[6] Generate final report
 
 $normal
 OUT
@@ -182,21 +181,22 @@ if ($step_number < 8 || $step_number>=12) {
     }
 }
 
-if($step_number==0 || $step_number>=6) 
-	{
-	print "generate the final report\n"; 
-	&bsub_final_report(); 
-	}
 
-if($step_number==6) 
-	{
-	print "generate the final report\n";
-    &bsub_final_report(1);
-    }
+#if($step_number==0 || $step_number>=6) 
+#	{
+#	print "generate the final report\n"; 
+#	&bsub_final_report(); 
+#	}
+
+#if($step_number==6) 
+#	{
+#	print "generate the final report\n";
+ #   &bsub_final_report(1);
+ #   }
 #######################################################################
 # send email to notify the finish of the analysis
 
-if (($step_number == 0) || ($step_number == 7)) {
+if (($step_number == 0) || ($step_number == 6)) {
     print $yellow, "Submitting the job for sending an email when the run finishes ",$sample_name, "...",$normal, "\n";
     $hold_job_file = $current_job_file;
     $current_job_file = "j7_email_".$sample_name.".sh";
