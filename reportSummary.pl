@@ -57,6 +57,7 @@ my $id2;
 
 if(-s $f_indel_fa)
 {
+
 my $np;
 my $pos;
 
@@ -66,15 +67,22 @@ while(<IN_ifa>)
 		chomp($l);
 		if($l=~/^>NP/)
                 {
-                    my @temp=split(/\s+/,$l);
+                    my @temp=split(/\s+\(/,$l);
                     $np=$temp[0];
                     $np=~s/^>//g;
                     $np=~s/-indel//g;
                     #my @temp2=split("-",$temp[4]);
-                    $temp[1]+=1;
-                    $pos=$temp[1]."-".$temp[2];
-                    $pos=~s/^\(INS:chr//g;
-                    $pos=~s/^\(DEL:chr//g;
+					#print $np,"\n";
+					my @temp2=split(/\-/,$temp[2]); 
+					$temp2[1]+=1; 
+					
+					#print $temp[1],"\t",$temp[2],"\n"; 
+					#<STDIN>;
+                    #$temp[1]+=1;
+                    $pos=$temp2[0]."-".$temp2[1];
+                    $pos=~s/^INS:chr//g;
+                    $pos=~s/^DEL:chr//g;
+					#print $np,"\t",$pos,"\n"; <STDIN>;
                 }
       else {  $imut{$pos}{$np}=$l;
 			  #print $pos,"\t",$np,"\n";
@@ -121,9 +129,10 @@ while(<IN_sfa>)
                     $np=~s/^>//g;
                     $np=~s/-VAR//g;
                     my @temp2=split("-",$temp[1]);
-                    $temp2[0]+=1;
-                    $pos=$temp2[0]."-".$temp[1];
+                    $temp2[1]+=1;
+                    $pos=$temp2[0]."-".$temp2[1];
                     $pos=~s/^chr//g;
+					#print $np,"\t",$pos,"\n"; <STDIN>;
                 }
                 else {
                      $smut{$pos}{$np}=$l;
