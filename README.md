@@ -53,9 +53,6 @@ This is required to be able to do git checkout, Needed just once:
 
 LSF_DOCKER_PRESERVE_ENVIRONMENT=true bsub -Is -R "select[mem>15000] rusage[mem=15000]" -M 32000000 -q docker-interactive -a "docker(scao/dailybox)" /bin/bash
 
-Switch version to v1.2:
-
-git checkout v1.2
 
 Make conda environment:
  
