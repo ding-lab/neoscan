@@ -12,7 +12,7 @@ use warnings;
 use Getopt::Long;
 
 #use POSIX;
-my $version = 1.1;
+my $version = 1.2;
 #color code
 my $red = "\e[31m";
 my $gray = "\e[37m";
