@@ -31,7 +31,7 @@ perl neoscan.pl --rdir <rdir> --log <log> --bamfq <bamfq> --bed <bed> --rna <rna
 
         <bamfq> = 1, input is bam; 0, input is fastq: default 1
 
-        <rna> =1, input data is rna, otherwise is dna
+        <rna> =1, input data is rna, otherwise is dna. For HLA genotype
 
         <bed> = bed file for annotation: ensembl: /gscmnt/gc2518/dinglab/scao/db/ensembl38.85/proteome-first.bed
 
