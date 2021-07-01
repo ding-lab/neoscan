@@ -41,20 +41,20 @@ perl neoscan.pl --rdir <rdir> --log <log> --bamfq <bamfq> --bed <bed> --rna <rna
 
         <step_number> run this pipeline step by step. (running the whole pipeline if step number is 0)
 
-Help: 
+
+Some hints for the installation in WU internal MGI cluster: 
     
-perl neoscan.pl
 
-Copy the tool to a folder. This command will create neoscan/ folder in your current folder:
+1. Copy the tool to a folder. This command will create neoscan/ folder in your current folder:
 
-git clone https://github.com/ding-lab/neoscan.git
+2. git clone https://github.com/ding-lab/neoscan.git
 
 This is required to be able to do git checkout, Needed just once:
 
 LSF_DOCKER_PRESERVE_ENVIRONMENT=true bsub -Is -R "select[mem>15000] rusage[mem=15000]" -M 32000000 -q docker-interactive -a "docker(scao/dailybox)" /bin/bash
 
 
-Make conda environment:
+3. Make conda environment:
  
 conda create -n neoantigen optitype=1.3.1 python=2.7
 
@@ -62,14 +62,13 @@ Copy the path to the OptiPathPipeline.py to the neoscan.pl
  
 which OptiTypePipeline.py and copy the output into the neoscan.pl script
 
-After you prepare vcf files, run this:
+To prepare vcf and bam input files, you can follow the example at /gscmnt/gc2524/dinglab/akarpova/cptac3/CCRCC_neoscan_test.  
  
-perl /gscmnt/gc2524/dinglab/akarpova/software/neoscan/neoscan.pl --rdir /gscmnt/gc2524/dinglab/akarpova/cptac3/CCRCC_neoscan/samples --log /gscmnt/gc2524/dinglab/akarpova/cptac3 --bamfq 1 --bed /gscmnt/gc2518/dinglab/scao/db/refseq_hg38_june29/proteome.bed --rna 1 --refdir /gscmnt/gc2518/dinglab/scao/db/refseq_hg38_june29 --step 1
+perl /gscmnt/gc2524/dinglab/akarpova/software/neoscan/neoscan.pl --rdir /gscmnt/gc2524/dinglab/akarpova/cptac3/CCRCC_neoscan_test --log /gscmnt/gc2524/dinglab/akarpova/cptac3 --bamfq 1 --bed /gscmnt/gc2518/dinglab/scao/db/refseq_hg38_june29/proteome.bed --rna 1 --refdir /gscmnt/gc2518/dinglab/scao/db/refseq_hg38_june29 --step 1
 
 Then change --step 2/3/4/5
 
-
-Don't run step6, step5 will give the final results
+After finishing running step 5, you can get the final result in the followint two files:
 
 *SAMPLE*.neo.snv.summary
 
