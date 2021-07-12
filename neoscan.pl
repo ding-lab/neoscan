@@ -33,7 +33,7 @@ $yellow     Usage: perl $0 --rdir --log --bamfq --bed --step --rna --refdir $nor
 
 <log> = full path of the folder saving log files 
 
-<bamfq> = 1, input is bam; 0, input is fastq: default 1
+<bam> = 1, input is bam; 0, input is fastq: default 1
 
 <rna> =1, input data is rna, otherwise is dna
 
@@ -70,7 +70,7 @@ my $status = &GetOptions (
 	  "rdir=s" => \$run_dir,
 	  "bed=s" => \$db_ref_bed,
 	  "refdir=s" => \$h38_fa,
- 	  "bamfq=i" => \$s_bam_fq,
+ 	  "bam=i" => \$s_bam_fq,
 	  "rna=i" => \$s_rna,		
       "log=s"  => \$log_dir,
 	  "help" => \$help
@@ -112,13 +112,13 @@ my $lsf_file_dir = $HOME1."/LSF_DIR_Neo";
 ## hlaminer for genotype, netMHC for neoantigen prediction ##
 
 my $db_hla_abc_cds="/gscmnt/gc2523/dinglab/neoantigen/human_DB/HLA_ABC_CDS.fasta";
-my $optitype="/gscmnt/gc2518/dinglab/scao/home/tools/anaconda2/bin/OptiTypePipeline.py"; 
+my $optitype="/gscmnt/gc2518/dinglab/scao/home/tools/anaconda3/bin/OptiTypePipeline.py"; 
 my $f_allele="/gscmnt/gc2523/dinglab/neoantigen/netMHC-4.0/Linux_x86_64/data/allelelist";
 my $netMHC="/gscmnt/gc2523/dinglab/neoantigen/netMHC-4.0/netMHC";
 my $samtools="/usr/bin/samtools";
 #my $db_ref_bed="/gscmnt/gc2518/dinglab/scao/db/refseq_hg38_june29/proteome.bed";
 #my $h38_fa="/gscmnt/gc2518/dinglab/scao/db/refseq_hg38_june29";
-my $f_opti_config = "/gscmnt/gc2737/ding/neoantigen/mmy_with_sc/rna/config/config.mmy.ini";
+my $f_opti_config = "/gscmnt/gc2518/dinglab/scao/home/git/neoscan/config.ini";
  
 #my $db_cdna="/gscmnt/gc3027/dinglab/medseq/fasta/human/Homo_sapiens.GRCh37.70.cdna.all.fa";
 #my $db_sanger_qs="/gscmnt/gc2523/dinglab/neoantigen/neoantigen-scan/quality_sanger.table.2col.tsv";
@@ -410,7 +410,7 @@ sub bsub_hla{
     print HLA "then\n";
     print HLA "rm -rf $dir_hla\n";   
     print HLA "fi\n";
-	print HLA "$optitype -i $f_fq_1 $f_fq_2 -r -c $f_opti_config -v -o $dir_hla"."\n";
+	print HLA "$optitype -i $f_fq_1 $f_fq_2 -c $f_opti_config --rna -v -o $dir_hla"."\n";
 #	print HLA "done\n";
     print HLA "fi\n";
 	print HLA "else\n";
@@ -422,7 +422,7 @@ sub bsub_hla{
     print HLA "then\n";
 	print HLA "rm -rf $dir_hla\n";	
     print HLA "fi\n";  	
-   	print HLA "$optitype -i $f_fq_1 $f_fq_2 -d -c $f_opti_config -v -o $dir_hla"."\n";
+   	print HLA "$optitype -i $f_fq_1 $f_fq_2 -c $f_opti_config --dna -v -o $dir_hla"."\n";
 #    print HLA "done\n";
 	print HLA "  fi\n";	
     print HLA "  fi\n";	
@@ -449,7 +449,7 @@ sub bsub_hla{
 	print HLA "fi\n";
    	close HLA;
     my $sh_file=$job_files_dir."/".$current_job_file;
-    $bsub_com = "bsub -q research-hpc -n 1 -R \"select[mem>100000] rusage[mem=100000]\" -M 100000000 -a \'docker(registry.gsc.wustl.edu/genome/genome_perl_environment)\' -w \"$hold_job_file\" -o $lsf_out -e $lsf_err sh $sh_file\n";
+    $bsub_com = "bsub -q research-hpc -n 1 -R \"select[mem>200000] rusage[mem=200000]\" -M 200000000 -a \'docker(registry.gsc.wustl.edu/genome/genome_perl_environment)\' -w \"$hold_job_file\" -o $lsf_out -e $lsf_err sh $sh_file\n";
     system ( $bsub_com );
 
 	}

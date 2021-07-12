@@ -58,7 +58,7 @@ LSF_DOCKER_PRESERVE_ENVIRONMENT=true bsub -Is -R "select[mem>15000] rusage[mem=1
  
 conda create -n neoantigen optitype=1.3.1 python=2.7
 
-Copy the path to the OptiPathPipeline.py to the neoscan.pl
+Copy the conda path for OptiPathPipeline.py to the script neoscan.pl
  
 which OptiTypePipeline.py and copy the output into the neoscan.pl script
 
