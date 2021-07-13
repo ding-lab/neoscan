@@ -1,29 +1,16 @@
-# neoantigen prediction: HG38 reference #
-## v1.3 #
-### Song Cao ###
+# neoscan pipeline v1.3 #
 
 Pipeline for detecting neoantigen from snvs and indels
 
+## Install the third-party software ##
 
- - vcf file for snvs with columns: chromosome, start position, ref allele, alt allele, gene hugo symbol, HGSV short, is it somatic or germline mutation. Filename: <id>.snp.vcf
+conda install -c bioconda optitype
 
-        1       113854971       C       G       PTPN22  p.E207Q Somatic
+Change the path for OptiPathPipeline.py in script neoscan.pl to where you install optitype
 
-        1       113900168       C       A       AP4B1   p.A284S Somatic
+## Usage ##
 
-        1       117623561       C       G       FAM46C  p.I231M Somatic
- 
- - vcf file for indels with the same columns. Filename <id>.indel.vcf
-
-        3       161086280       T       -       B3GALNT1        p.T159Pfs*8     Somatic
- 
- - RNA-Seq bam or fastaq file for HLA type
-
-All three input files should be in one folder. One set of files per sample
-
-Command to run: 
-
-perl neoscan.pl --rdir <rdir> --log <log> --bamfq <bamfq> --bed <bed> --rna <rna> --refdir <refdir> --step <step_number> 
+perl neoscan.pl --rdir <rdir> --log <log> --bamfq <bamfq> --bed <bed> --rna <rna> --refdir <refdir> --step <step_number>
 
         <rdir> = full path of the folder holding files for this sequence run
 
@@ -41,8 +28,24 @@ perl neoscan.pl --rdir <rdir> --log <log> --bamfq <bamfq> --bed <bed> --rna <rna
 
         <step_number> run this pipeline step by step. (running the whole pipeline if step number is 0)
 
+# files required in the running directory ##
+ - vcf file format for snvs with columns: chromosome, start position, ref allele, alt allele, gene hugo symbol, HGSV short, is it somatic or germline mutation. Filename: <id>.snp.vcf
 
-Some hints for the installation in WU internal MGI cluster: 
+        1       113854971       C       G       PTPN22  p.E207Q Somatic
+
+        1       113900168       C       A       AP4B1   p.A284S Somatic
+
+        1       117623561       C       G       FAM46C  p.I231M Somatic
+ 
+ - vcf file for indels with the same columns. Filename <id>.indel.vcf
+
+        3       161086280       T       -       B3GALNT1        p.T159Pfs*8     Somatic
+ 
+ - RNA-Seq or exome bam  or fastq file for HLA type
+
+All three input files should be in one folder. One set of files per sample
+
+# Some hints for running neoscan pipleine in WU internal MGI cluster # 
     
 
 1. Copy the tool to a folder. This command will create neoscan/ folder in your current folder:
@@ -53,9 +56,8 @@ This is required to be able to do git checkout, Needed just once:
 
 LSF_DOCKER_PRESERVE_ENVIRONMENT=true bsub -Is -R "select[mem>15000] rusage[mem=15000]" -M 32000000 -q docker-interactive -a "docker(scao/dailybox)" /bin/bash
 
+3. install optitype 
 
-3. Install Optitype through conda environment:
- 
 conda install -c bioconda optitype
 
 Change the path for OptiPathPipeline.py in script neoscan.pl to where you install optitype
@@ -74,4 +76,8 @@ After finishing running step 5, you can get the final result in the followint tw
 
 Then you may want to filter out peptides found in human cells in general. Just grep every single peptide in this database 
 /gscmnt/gc2518/dinglab/scao/db/ensembl38.85/Homo_sapiens.GRCh38.pep.all.fa.cleaned.fa
+
+## Contact ##
+
+Song Cao, scao@wustl.edu 
 
