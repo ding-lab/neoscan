@@ -54,13 +54,11 @@ This is required to be able to do git checkout, Needed just once:
 LSF_DOCKER_PRESERVE_ENVIRONMENT=true bsub -Is -R "select[mem>15000] rusage[mem=15000]" -M 32000000 -q docker-interactive -a "docker(scao/dailybox)" /bin/bash
 
 
-3. Make conda environment:
+3. Install Optitype through conda environment:
  
-conda create -n neoantigen optitype=1.3.1 python=2.7
+conda install -c bioconda optitype
 
-Copy the conda path for OptiPathPipeline.py to the script neoscan.pl
- 
-which OptiTypePipeline.py and copy the output into the neoscan.pl script
+Change the path for OptiPathPipeline.py in script neoscan.pl to where you install optitype
 
 To prepare vcf and bam input files, you can follow the example at /gscmnt/gc2524/dinglab/akarpova/cptac3/CCRCC_neoscan_test.  
  
