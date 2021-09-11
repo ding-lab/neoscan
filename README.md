@@ -1,4 +1,4 @@
-# neoscan pipeline v1.3 #
+# neoscan pipeline v1.3 for wustl computer1 cluster#
 
 Pipeline for detecting neoantigen from snvs and indels
 
