@@ -1,0 +1,34 @@
+## 1. create directory
+rm -rf /gscmnt/gc2532/dinglab/scao/cptac-neo/OV
+
+mkdir /gscmnt/gc2532/dinglab/scao/cptac-neo/OV
+
+mkdir /gscmnt/gc2532/dinglab/scao/cptac-neo/worklog
+
+## 2. get exome bam path 
+
+perl -e '$f="/gscmnt/gc2532/dinglab/scao/cptac-neo/data/v1.1/CPTAC2_CPTAC3_WES_Bammap_v3"; $f_s="/gscmnt/gc2532/dinglab/scao/cptac-neo/data/v1.1/Case_ID/OV/Case_ID_OV.tsv"; foreach $l (`cat $f_s`) { $ltr=$l; chomp($ltr); if($ltr=~/^CASE/) { next; } else { @t=split("\t",$ltr); $slist{$t[0]}=1; }} foreach $l (`cat $f`) { $ltr=$l; chomp($ltr); if($ltr=~/^#/) { next; } else { @t=split("\t",$ltr); $sn=$t[0]; if(defined $slist{$sn}) { $bam{$sn}=$t[1];  }} } print "Sample","\t","WXS_normal_bam_path","\n"; foreach $s (sort keys %bam) { print $s,"\t",$bam{$s},"\n"; }'  > /gscmnt/gc2532/dinglab/scao/cptac-neo/worklog/OV.WXS.normal.bam.tsv
+
+#### 3. softlink exome normal bam
+perl -e '$dir="/gscmnt/gc2532/dinglab/scao/cptac-neo/OV";  $f_bam="/gscmnt/gc2532/dinglab/scao/cptac-neo/worklog/OV.WXS.normal.bam.tsv"; foreach $l (`cat $f_bam`) { $ltr=$l; chomp($ltr); if($ltr=~/^Sample/) { next; }  @temp=split("\t",$ltr); $sn=$temp[0]; $sample_to_bam{$sn}=$temp[1]; $cint=int($cc/25); $dirx=$dir."/work".$cint; if (!-d $dirx) { `mkdir $dirx`; }  $dir_o=$dirx."/".$sn; $sample_2_dir{$sn}=$dir_o."/".$sn; if (! -d $dir_o) { `mkdir $dir_o`; } $f_o=$dir_o."/".$sn.".bam"; `ln -s $temp[1] $f_o`; $cc++; }'
+
+
+## 4. generate vcf ##
+
+## 1   12795514    C   A   PRAMEF1 p.Q315K Somatic
+perl -e '$dir="/gscmnt/gc2532/dinglab/scao/cptac-neo/OV"; $f_maf="/gscmnt/gc2532/dinglab/scao/cptac-neo/data/v1.1/PanCan_Union_Maf_Broad_WashU_v1.1.maf"; $f_bam="/gscmnt/gc2532/dinglab/scao/cptac-neo/worklog/OV.WXS.normal.bam.tsv"; foreach $l (`cat $f_bam`) { $ltr=$l; chomp($ltr); @temp=split("\t",$ltr); if($ltr=~/^Sample/) { next; } $sn=$temp[0]; $sample_to_bam{$sn}=$temp[1]; $cint=int($cc/25); $dirx=$dir."/work".$cint; if (!-d $dirx) { `mkdir $dirx`};  $dir_o=$dirx."/".$sn; $sample_2_dir{$sn}=$dir_o; $cc++; $f_indel=$dir_o."/".$sn.".indel.vcf"; $f_snp=$dir_o."/".$sn.".snp.vcf"; `rm $f_indel`; `rm $f_snp`; print $sn,"\t",$temp[1],"\n";  } print "reading maf file\n"; foreach $l (`cat $f_maf`) { $ltr=$l; chomp($ltr); if($ltr=~/^Hugo/) { next; } @temp=split("\t",$ltr); $sn=$temp[12]; $sn=~s/_T//g; print $sn,"\n"; $chr=$temp[3]; $chr=~s/chr//g;   if(defined $sample_2_dir{$sn}) { if($temp[7] eq "Frame_Shift_Del" || $temp[7] eq "Frame_Shift_Ins" || $temp[7] eq "In_Frame_Del" || $temp[7] eq "In_Frame_Ins" || $temp[7] eq "Missense_Mutation" || $temp[7] eq "Nonstop_Mutation") { $f_out_indel=$sample_2_dir{$sn}."/".$sn.".indel.vcf";  open(OUT2,">>$f_out_indel");  $f_out_snp=$sample_2_dir{$sn}."/".$sn.".snp.vcf"; open(OUT1,">>$f_out_snp"); if($temp[8] eq "SNP") { print OUT1 $chr,"\t",$temp[4],"\t",$temp[9],"\t",$temp[11],"\t",$temp[0],"\t",$temp[26],"\t","Somatic","\n";} if($temp[8] eq "DEL" || $temp[8] eq "INS")  { print OUT2 $chr,"\t",$temp[4],"\t",$temp[9],"\t",$temp[11],"\t",$temp[0],"\t",$temp[26],"\t","Somatic","\n"; }}}}'
+
+## 5. generate log directory
+mkdir /gscmnt/gc2532/dinglab/scao/cptac-neo/OV.log
+
+## 6. run neoscan pipeline
+perl neoscan.pl --rdir /gscmnt/gc2532/dinglab/scao/cptac-neo/OV/work0 --log /gscmnt/gc2532/dinglab/scao/cptac-neo/OV.log --bam 1 --bed /gscmnt/gc2518/dinglab/scao/db/refseq_hg38_june29/proteome.bed --rna 0 --refdir /gscmnt/gc2518/dinglab/scao/db/refseq_hg38_june29 --step 3
+
+
+perl neoscan.pl --rdir /gscmnt/gc2532/dinglab/scao/cptac-neo/OV/work1 --log /gscmnt/gc2532/dinglab/scao/cptac-neo/OV.log --bam 1 --bed /gscmnt/gc2518/dinglab/scao/db/refseq_hg38_june29/proteome.bed --rna 0 --refdir /gscmnt/gc2518/dinglab/scao/db/refseq_hg38_june29 --step 3
+
+perl neoscan.pl --rdir /gscmnt/gc2532/dinglab/scao/cptac-neo/OV/work2 --log /gscmnt/gc2532/dinglab/scao/cptac-neo/OV.log --bam 1 --bed /gscmnt/gc2518/dinglab/scao/db/refseq_hg38_june29/proteome.bed --rna 0 --refdir /gscmnt/gc2518/dinglab/scao/db/refseq_hg38_june29 --step 3
+
+perl neoscan.pl --rdir /gscmnt/gc2532/dinglab/scao/cptac-neo/OV/work3 --log /gscmnt/gc2532/dinglab/scao/cptac-neo/OV.log --bam 1 --bed /gscmnt/gc2518/dinglab/scao/db/refseq_hg38_june29/proteome.bed --rna 0 --refdir /gscmnt/gc2518/dinglab/scao/db/refseq_hg38_june29 --step 3
+
+perl neoscan.pl --rdir /gscmnt/gc2532/dinglab/scao/cptac-neo/OV/work4 --log /gscmnt/gc2532/dinglab/scao/cptac-neo/OV.log --bam 1 --bed /gscmnt/gc2518/dinglab/scao/db/refseq_hg38_june29/proteome.bed --rna 0 --refdir /gscmnt/gc2518/dinglab/scao/db/refseq_hg38_june29 --step 3

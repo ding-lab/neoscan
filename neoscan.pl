@@ -49,7 +49,7 @@ $red     	[1] Generate fasta snv and indel
 $green      [3]  Run HLA type
 $purple		[4]  Run netMHC 
 		    [5] parse netMHC result
-
+$cyan 		[6] generate report summary
 $normal
 OUT
 
@@ -137,7 +137,7 @@ opendir(DH, $run_dir) or die "Cannot open dir $run_dir: $!\n";
 my @sample_dir_list = readdir DH;
 close DH;
 
-if ($step_number < 8 || $step_number>=12) {
+if ($step_number < 6) {
     #begin to process each sample
     for (my $i=0;$i<@sample_dir_list;$i++) {#use the for loop instead. the foreach loop has some problem to pass the global variable $sample_name to the sub functions
         $sample_name = $sample_dir_list[$i];
@@ -146,25 +146,7 @@ if ($step_number < 8 || $step_number>=12) {
             if (-d $sample_full_path) { # is a full path directory containing a sample
                 print $yellow, "\nSubmitting jobs for the sample ",$sample_name, "...",$normal, "\n";
                 $current_job_file="";
-                if($step_number == 0 || $step_number>=12)
-                { 
-					if($step_number==0)
-					{
-						&bsub_fa();}
-					if($step_number<=12)
-					{
-						&bsub_pep(); }
-					if($step_number<=13)
-					{
-						&bsub_hla();}
-					if($step_number<=14)
-					{
-						&bsub_netmhc();}
-					if($step_number<=15)
-					{
-						&bsub_parsemhc();}
-				}
-				elsif ($step_number == 1) {
+				if ($step_number == 1) {
                     &bsub_fa();
                 } 
                 elsif ($step_number == 2) {
@@ -182,44 +164,12 @@ if ($step_number < 8 || $step_number>=12) {
 }
 
 
-#if($step_number==0 || $step_number>=6) 
-#	{
-#	print "generate the final report\n"; 
-#	&bsub_final_report(); 
-#	}
-
-#if($step_number==6) 
-#	{
-#	print "generate the final report\n";
- #   &bsub_final_report(1);
- #   }
-#######################################################################
-# send email to notify the finish of the analysis
-
-if (($step_number == 0) || ($step_number == 6)) {
-    print $yellow, "Submitting the job for sending an email when the run finishes ",$sample_name, "...",$normal, "\n";
-    $hold_job_file = $current_job_file;
-    $current_job_file = "j7_email_".$sample_name.".sh";
-    #my $IN_sam = $sample_full_path."/".$sample_name.".exome.sam"; 
- 	my $email="scao\@wustl.edu"; 
-    my $lsf_out=$lsf_file_dir."/".$current_job_file.".out";
-    my $lsf_err=$lsf_file_dir."/".$current_job_file.".err";
-    `rm $lsf_out`;
-    `rm $lsf_err`;
-
-    open(EMAIL, ">$job_files_dir/$current_job_file") or die $!;
-    print EMAIL "#!/bin/bash\n";
-    print EMAIL $run_script_path."send_email.pl ".$run_dir." ".$email."\n";
-    close EMAIL;
-    my $sh_file=$job_files_dir."/".$current_job_file;
-    $bsub_com = "bsub -q research-hpc -n 1 -R \"select[mem>30000] rusage[mem=30000]\" -M 30000000 -a \'docker(registry.gsc.wustl.edu/genome/genome_perl_environment)\' -o $lsf_out -e $lsf_err sh $sh_file\n";
-	system ( $bsub_com );
+if($step_number==6) 
+	{
+	print "generate the final report\n"; 
+	&bsub_final_report(); 
 	}
 
-#######################################################################
-if ($step_number == 0) {
-    print $green, "All jobs are submitted! You will get email notification when this run is completed.\n",$normal;
-}
 
 sub bsub_fa{
 
@@ -360,9 +310,10 @@ sub bsub_hla{
 
     if ((! -e $IN_bam) && ((!-e $f_fq_1) || (! -e $f_fq_2)) && (!-e $f_hla_type)) {#make sure there is a input fasta file 
         print $red,  "&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&\n";
-        print "Warning: Died because there is no input bam or fq file for bwa:\n";
+        print "Warning: there is no input bam or fq file for bwa:\n";
         print "File $IN_bam does not exist!\n";
-        die "Please check command line argument!", $normal, "\n\n";
+		#last;
+        #die "Please check command line argument!", $normal, "\n\n";
     }
 
     #if (! -s $IN_bam) {#make sure input fasta file is not empty
@@ -587,7 +538,7 @@ sub bsub_final_report()
 	#print REP "#BSUB -q ding-lab\n";
     #print REP "#BSUB -J $current_job_file\n";
     #print REP "#BSUB -w \"$hold_job_file\"","\n";
-	print REP " ".$run_script_path_perl."generate_report_summary.pl $run_dir $version"."\n";
+	print REP " ".$run_script_path_perl."generate_report_summary_2.pl $run_dir"."\n";
 	close REP;
     #$bsub_com = "bsub < $job_files_dir/$current_job_file\n";
     #system ( $bsub_com );

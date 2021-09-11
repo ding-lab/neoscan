@@ -23,3 +23,6 @@ mkdir /gscmnt/gc2532/dinglab/scao/cptac-neo/HNSCC.log
 
 ## 6. run neoscan pipeline
 perl neoscan.pl --rdir /gscmnt/gc2532/dinglab/scao/cptac-neo/HNSCC/work0 --log /gscmnt/gc2532/dinglab/scao/cptac-neo/HNSCC.log --bam 1 --bed /gscmnt/gc2518/dinglab/scao/db/refseq_hg38_june29/proteome.bed --rna 0 --refdir /gscmnt/gc2518/dinglab/scao/db/refseq_hg38_june29 --step 3
+
+
+perl neoscan.pl --rdir /gscmnt/gc2532/dinglab/scao/cptac-neo/HNSCC/work5 --log /gscmnt/gc2532/dinglab/scao/cptac-neo/HNSCC.log --bam 1 --bed /gscmnt/gc2518/dinglab/scao/db/refseq_hg38_june29/proteome.bed --rna 0 --refdir /gscmnt/gc2518/dinglab/scao/db/refseq_hg38_june29 --step 3
