@@ -4,7 +4,7 @@
 
 ### updated 08/11/2018 ##
 
-### use docker image for submitting jobs to research-hpc queue ##
+### use docker image for submitting jobs to dinglab queue ##
 
 #!/usr/bin/perl
 use strict;
@@ -115,7 +115,7 @@ my $db_hla_abc_cds="/gscmnt/gc2523/dinglab/neoantigen/human_DB/HLA_ABC_CDS.fasta
 my $optitype="/gscmnt/gc2518/dinglab/scao/home/tools/anaconda3/bin/OptiTypePipeline.py"; 
 my $f_allele="/gscmnt/gc2523/dinglab/neoantigen/netMHC-4.0/Linux_x86_64/data/allelelist";
 my $netMHC="/gscmnt/gc2523/dinglab/neoantigen/netMHC-4.0/netMHC";
-my $samtools="/usr/bin/samtools";
+my $samtools="/storage1/fs1/songcao/Active/Software/anaconda3/bin/samtools";
 #my $db_ref_bed="/gscmnt/gc2518/dinglab/scao/db/refseq_hg38_june29/proteome.bed";
 #my $h38_fa="/gscmnt/gc2518/dinglab/scao/db/refseq_hg38_june29";
 my $f_opti_config = "/gscmnt/gc2518/dinglab/scao/home/git/neoscan/config.ini";
@@ -213,7 +213,7 @@ sub bsub_fa{
     #$bsub_com = "bsub < $job_files_dir/$current_job_file\n";
     my $sh_file=$job_files_dir."/".$current_job_file;
 
-    $bsub_com = "bsub -q research-hpc -n 1 -R \"select[mem>30000] rusage[mem=30000]\" -M 30000000 -a \'docker(registry.gsc.wustl.edu/genome/genome_perl_environment)\' -o $lsf_out -e $lsf_err sh $sh_file\n"; 
+    $bsub_com = "bsub -q dinglab -n 1 -R \"select[mem>30000] rusage[mem=30000]\" -M 30000000 -a \'docker(registry.gsc.wustl.edu/genome/genome_perl_environment)\' -o $lsf_out -e $lsf_err sh $sh_file\n"; 
 
     system ( $bsub_com );
 }
@@ -270,8 +270,8 @@ sub bsub_pep{
     close PEP;
     my $sh_file=$job_files_dir."/".$current_job_file;
 
-   # $bsub_com = "bsub -q research-hpc -n 1 -R \"select[mem>30000] rusage[mem=30000]\" -M 30000000 -a \'docker(registry.gsc.wustl.edu/genome/genome_perl_environment)\' -w $hold_job_file -o $lsf_out -e $lsf_err sh $sh_file\n"; 
-    $bsub_com = "bsub -q research-hpc -n 1 -R \"select[mem>30000] rusage[mem=30000]\" -M 30000000 -a \'docker(registry.gsc.wustl.edu/genome/genome_perl_environment)\' -o $lsf_out -e $lsf_err sh $sh_file\n";
+   # $bsub_com = "bsub -q dinglab -n 1 -R \"select[mem>30000] rusage[mem=30000]\" -M 30000000 -a \'docker(registry.gsc.wustl.edu/genome/genome_perl_environment)\' -w $hold_job_file -o $lsf_out -e $lsf_err sh $sh_file\n"; 
+    $bsub_com = "bsub -q dinglab -n 1 -R \"select[mem>30000] rusage[mem=30000]\" -M 30000000 -a \'docker(registry.gsc.wustl.edu/genome/genome_perl_environment)\' -o $lsf_out -e $lsf_err sh $sh_file\n";
    #$bsub_com = "bsub < $job_files_dir/$current_job_file\n";
     system ( $bsub_com );
 }
@@ -321,52 +321,37 @@ sub bsub_hla{
      #   die "Warning: Died because $IN_bam is empty!", $normal, "\n\n";
     #}
     open(HLA, ">$job_files_dir/$current_job_file") or die $!;
-  # my $f_fq_1=$sample_full_path."/".$sample_name.".1.fq";
-   # my $f_fq_2=$sample_full_path."/".$sample_name.".2.fq";
-    
     print HLA "#!/bin/bash\n";
-    #print HLA "#BSUB -n 1\n";
-    #print HLA "#BSUB -R \"rusage[mem=30000]\"","\n";
-    #print HLA "#BSUB -M 30000000\n";
-    #print HLA "#BSUB -q ding-lab\n";
-	#print HLA "#BSUB -w \"$hold_job_file\"","\n";
-	#print HLA "#BSUB -o $lsf_file_dir","/","$current_job_file.out\n";
-    #print HLA "#BSUB -e $lsf_file_dir","/","$current_job_file.err\n";
-    #print HLA "#BSUB -J $current_job_file\n";
-	print HLA "HLA_IN=".$sample_full_path."/".$sample_name.".bam\n";
+    print HLA "HLA_IN=".$sample_full_path."/".$sample_name.".bam\n";
     print HLA "HLA_sorted=".$sample_full_path."/".$sample_name.".sorted\n";
     print HLA "HLA_sorted_bam=".$sample_full_path."/".$sample_name.".sorted.bam\n";
     print HLA "HLA_tsv=".$sample_full_path."/HLA_alleles.tsv\n";
     print HLA "f_optitype_hla=".$sample_full_path."/hla/notexisting.tsv\n";
-#	print HLA "dir_hla=".$sample_full_path."/hla\n";
-	print HLA "if [ $s_bam_fq -eq 1 ]\n";
+    print HLA "if [ $s_bam_fq -eq 1 ]\n";
     print HLA "then\n";
-	print HLA 'if [ -f $IN_bam ]',"\n"; # input file exist
-	print HLA "then\n";
-    print HLA "$samtools sort -n \${HLA_IN} \${HLA_sorted}","\n";
-	print HLA "$samtools view \${HLA_sorted_bam} | perl -ne \'\$l=\$_; \$f_q1=\"$f_fq_1\"; \$f_q2=\"$f_fq_2\"; if(\$first==0) { open(OUT1,\">\$f_q1\"); open(OUT2,\">\$f_q2\");  \$first=1;}  \@ss=split(\"\\t\",\$l); \$flag=\$ss[1]; \$cigar=\$ss[5]; if((\$flag & 0x100) || (\$flag & 0x800) || (\$cigar=~/H/)) { next; } \$id=\$ss[0]; \$seq=\$ss[9]; \$q=\$ss[10];  if(\$id=~/\\/1\$/ || (\$flag & 0x40) ) { \$r1=\$id; \$r1=~s/\\/1\$//g; \$seq1=\$seq; \$q1=\$q; } if(\$id=~/\\/2\$/ || (\$flag & 0x80)) { \$r2=\$id; \$r2=~s/\\/2\$//g; \$seq2=\$seq; \$q2=\$q; } if((\$r1 eq \$r2)) { print OUT1 \"\@\",\$r1,\"/1\",\"\\n\"; print OUT1 \$seq1,\"\\n\"; print OUT1 \"+\",\"\\n\"; print OUT1 \$q1,\"\\n\"; print OUT2 \"\@\",\$r1,\"/2\",\"\\n\"; print OUT2 \$seq2,\"\\n\"; print OUT2 \"+\",\"\\n\"; print OUT2 \$q2,\"\\n\";}\'","\n";
-	print HLA "  fi\n";
+    print HLA 'if [ -f $IN_bam ]',"\n"; # input file exist
+    print HLA "then\n";
+    print HLA "$samtools sort -n \${HLA_IN} -o \${HLA_sorted}","\n";
+    print HLA "$samtools view \${HLA_sorted_bam} | perl -ne \'\$l=\$_; \$f_q1=\"$f_fq_1\"; \$f_q2=\"$f_fq_2\"; if(\$first==0) { open(OUT1,\">\$f_q1\"); open(OUT2,\">\$f_q2\");  \$first=1;}  \@ss=split(\"\\t\",\$l); \$flag=\$ss[1]; \$cigar=\$ss[5]; if((\$flag & 0x100) || (\$flag & 0x800) || (\$cigar=~/H/)) { next; } \$id=\$ss[0]; \$seq=\$ss[9]; \$q=\$ss[10];  if(\$id=~/\\/1\$/ || (\$flag & 0x40) ) { \$r1=\$id; \$r1=~s/\\/1\$//g; \$seq1=\$seq; \$q1=\$q; } if(\$id=~/\\/2\$/ || (\$flag & 0x80)) { \$r2=\$id; \$r2=~s/\\/2\$//g; \$seq2=\$seq; \$q2=\$q; } if((\$r1 eq \$r2)) { print OUT1 \"\@\",\$r1,\"/1\",\"\\n\"; print OUT1 \$seq1,\"\\n\"; print OUT1 \"+\",\"\\n\"; print OUT1 \$q1,\"\\n\"; print OUT2 \"\@\",\$r1,\"/2\",\"\\n\"; print OUT2 \$seq2,\"\\n\"; print OUT2 \"+\",\"\\n\"; print OUT2 \$q2,\"\\n\";}\'","\n";
+    print HLA "  fi\n";
     print HLA "fi\n"; 
-	print HLA "if [ -f $f_fq_1 ] && [ -f $f_fq_2 ]","\n"; # input file exist
+    print HLA "if [ -f $f_fq_1 ] && [ -f $f_fq_2 ]","\n"; # input file exist
     print HLA "then\n";
-	print HLA "if [ $s_rna -eq 1 ]\n";
+    print HLA "if [ $s_rna -eq 1 ]\n";
     print HLA "then\n";	
-	print HLA "if [ -d $dir_hla ]","\n";
-    print HLA "then\n";		
-	print HLA "f_optitype_hla=`find $dir_hla -name '*tsv'`","\n";
-	print HLA "fi\n";
-	print HLA "if [ -z \${f_optitype_hla} ] || [ ! -f \${f_optitype_hla} ]\n";
+    print HLA "if [ -d $dir_hla ]","\n";
+    print HLA "then\n";		 
+    print HLA "f_optitype_hla=`find $dir_hla -name '*tsv'`","\n";
+    print HLA "fi\n";
+    print HLA "if [ -z \${f_optitype_hla} ] || [ ! -f \${f_optitype_hla} ]\n";
     print HLA "then\n";
     print HLA "if [ -d $dir_hla ]","\n";
     print HLA "then\n";
     print HLA "rm -rf $dir_hla\n";   
     print HLA "fi\n";
 	print HLA "$optitype -i $f_fq_1 $f_fq_2 -c $f_opti_config --rna -v -o $dir_hla"."\n";
-#	print HLA "done\n";
     print HLA "fi\n";
 	print HLA "else\n";
-#    print HLA "while [ ! -f \${f_optitype_hla} ]\n";
-#    print HLA "do\n";
     print HLA "if [ ! -f \${f_optitype_hla} ]\n";
     print HLA "then\n";
     print HLA "if [ -d $dir_hla ]","\n";
@@ -374,15 +359,12 @@ sub bsub_hla{
 	print HLA "rm -rf $dir_hla\n";	
     print HLA "fi\n";  	
    	print HLA "$optitype -i $f_fq_1 $f_fq_2 -c $f_opti_config --dna -v -o $dir_hla"."\n";
-#    print HLA "done\n";
 	print HLA "  fi\n";	
     print HLA "  fi\n";	
-    #print HLA  " ".$run_script_path_perl."parseHLAresult.pl \${f_optitype_hla} \${HLA_tsv}"."\n";
  	print HLA "if [ -d $dir_hla ]","\n";
     print HLA "then\n";
     print HLA "f_optitype_hla=`find $dir_hla -name '*tsv'`","\n";
     print HLA "fi\n";
-### finish hla type, then delete ##
 	print HLA "if [ ! -z \${f_optitype_hla} ] && [  -f \${f_optitype_hla} ]\n";
 	print HLA "then\n";
 	print HLA "rm \${HLA_sorted_bam}","\n";
@@ -400,7 +382,7 @@ sub bsub_hla{
 	print HLA "fi\n";
    	close HLA;
     my $sh_file=$job_files_dir."/".$current_job_file;
-    $bsub_com = "bsub -q research-hpc -n 1 -R \"select[mem>200000] rusage[mem=200000]\" -M 200000000 -a \'docker(registry.gsc.wustl.edu/genome/genome_perl_environment)\' -w \"$hold_job_file\" -o $lsf_out -e $lsf_err sh $sh_file\n";
+    $bsub_com = "bsub -q dinglab -n 1 -R \"select[mem>200000] rusage[mem=200000]\" -M 200000000 -a \'docker(ubuntu)\' -o $lsf_out -e $lsf_err \'sh $sh_file\'\n";
     system ( $bsub_com );
 
 	}
@@ -452,9 +434,9 @@ sub bsub_netmhc{
 
     my $sh_file=$job_files_dir."/".$current_job_file;
 
-  #  $bsub_com = "bsub -q research-hpc -n 1 -R \"select[mem>30000] rusage[mem=30000]\" -M 30000000 -a \'docker(registry.gsc.wustl.edu/genome/genome_perl_environment)\' -o $lsf_out -e $lsf_err sh $sh_file\n";
+  #  $bsub_com = "bsub -q dinglab -n 1 -R \"select[mem>30000] rusage[mem=30000]\" -M 30000000 -a \'docker(registry.gsc.wustl.edu/genome/genome_perl_environment)\' -o $lsf_out -e $lsf_err sh $sh_file\n";
 
-    $bsub_com = "LSF_DOCKER_PRESERVE_ENVIRONMENT=false bsub -q research-hpc -n 1 -R \"select[mem>30000] rusage[mem=30000]\" -M 30000000 -a \'docker(scao/dailybox)\' -o $lsf_out -e $lsf_err sh $sh_file\n";
+    $bsub_com = "LSF_DOCKER_PRESERVE_ENVIRONMENT=false bsub -q dinglab -n 1 -R \"select[mem>30000] rusage[mem=30000]\" -M 30000000 -a \'docker(scao/dailybox)\' -o $lsf_out -e $lsf_err sh $sh_file\n";
 
     system ( $bsub_com );
 	
@@ -505,7 +487,7 @@ sub bsub_parsemhc{
 	close PMHC;
     my $sh_file=$job_files_dir."/".$current_job_file;
 
-    $bsub_com = "bsub -q research-hpc -n 1 -R \"select[mem>30000] rusage[mem=30000]\" -M 30000000 -a \'docker(registry.gsc.wustl.edu/genome/genome_perl_environment)\' -w \"$hold_job_file\" -o $lsf_out -e $lsf_err sh $sh_file\n";
+    $bsub_com = "bsub -q dinglab -n 1 -R \"select[mem>30000] rusage[mem=30000]\" -M 30000000 -a \'docker(registry.gsc.wustl.edu/genome/genome_perl_environment)\' -w \"$hold_job_file\" -o $lsf_out -e $lsf_err sh $sh_file\n";
     system ( $bsub_com );
 }
 
@@ -544,8 +526,8 @@ sub bsub_final_report()
     #system ( $bsub_com );
 
     my $sh_file=$job_files_dir."/".$current_job_file;
-   # $bsub_com = "bsub -q research-hpc -n 1 -R \"select[mem>30000] rusage[mem=30000]\" -M 30000000 -a \'docker(registry.gsc.wustl.edu/genome/genome_perl_environment)\' -w $hold_job_file -o $lsf_out -e $lsf_err sh $sh_file\n"; 
-    $bsub_com = "bsub -q research-hpc -n 1 -R \"select[mem>30000] rusage[mem=30000]\" -M 30000000 -a \'docker(registry.gsc.wustl.edu/genome/genome_perl_environment)\' -w \"$hold_job_file\" -o $lsf_out -e $lsf_err sh $sh_file\n";
+   # $bsub_com = "bsub -q dinglab -n 1 -R \"select[mem>30000] rusage[mem=30000]\" -M 30000000 -a \'docker(registry.gsc.wustl.edu/genome/genome_perl_environment)\' -w $hold_job_file -o $lsf_out -e $lsf_err sh $sh_file\n"; 
+    $bsub_com = "bsub -q dinglab -n 1 -R \"select[mem>30000] rusage[mem=30000]\" -M 30000000 -a \'docker(registry.gsc.wustl.edu/genome/genome_perl_environment)\' -w \"$hold_job_file\" -o $lsf_out -e $lsf_err sh $sh_file\n";
    #$bsub_com = "bsub < $job_files_dir/$current_job_file\n";
     system ( $bsub_com );
     
