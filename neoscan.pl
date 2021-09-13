@@ -323,7 +323,7 @@ sub bsub_hla{
     open(HLA, ">$job_files_dir/$current_job_file") or die $!;
     print HLA "#!/bin/bash\n";
     print HLA "HLA_IN=".$sample_full_path."/".$sample_name.".bam\n";
-    print HLA "HLA_sorted=".$sample_full_path."/".$sample_name.".sorted\n";
+    #print HLA "HLA_sorted=".$sample_full_path."/".$sample_name.".sorted\n";
     print HLA "HLA_sorted_bam=".$sample_full_path."/".$sample_name.".sorted.bam\n";
     print HLA "HLA_tsv=".$sample_full_path."/HLA_alleles.tsv\n";
     print HLA "f_optitype_hla=".$sample_full_path."/hla/notexisting.tsv\n";
@@ -331,7 +331,7 @@ sub bsub_hla{
     print HLA "then\n";
     print HLA 'if [ -f $IN_bam ]',"\n"; # input file exist
     print HLA "then\n";
-    print HLA "$samtools sort -n \${HLA_IN} -o \${HLA_sorted}","\n";
+    #print HLA "$samtools sort -n \${HLA_IN} -o \${HLA_sorted_bam}","\n";
     print HLA "$samtools view \${HLA_sorted_bam} | perl -ne \'\$l=\$_; \$f_q1=\"$f_fq_1\"; \$f_q2=\"$f_fq_2\"; if(\$first==0) { open(OUT1,\">\$f_q1\"); open(OUT2,\">\$f_q2\");  \$first=1;}  \@ss=split(\"\\t\",\$l); \$flag=\$ss[1]; \$cigar=\$ss[5]; if((\$flag & 0x100) || (\$flag & 0x800) || (\$cigar=~/H/)) { next; } \$id=\$ss[0]; \$seq=\$ss[9]; \$q=\$ss[10];  if(\$id=~/\\/1\$/ || (\$flag & 0x40) ) { \$r1=\$id; \$r1=~s/\\/1\$//g; \$seq1=\$seq; \$q1=\$q; } if(\$id=~/\\/2\$/ || (\$flag & 0x80)) { \$r2=\$id; \$r2=~s/\\/2\$//g; \$seq2=\$seq; \$q2=\$q; } if((\$r1 eq \$r2)) { print OUT1 \"\@\",\$r1,\"/1\",\"\\n\"; print OUT1 \$seq1,\"\\n\"; print OUT1 \"+\",\"\\n\"; print OUT1 \$q1,\"\\n\"; print OUT2 \"\@\",\$r1,\"/2\",\"\\n\"; print OUT2 \$seq2,\"\\n\"; print OUT2 \"+\",\"\\n\"; print OUT2 \$q2,\"\\n\";}\'","\n";
     print HLA "  fi\n";
     print HLA "fi\n"; 
@@ -349,9 +349,9 @@ sub bsub_hla{
     print HLA "then\n";
     print HLA "rm -rf $dir_hla\n";   
     print HLA "fi\n";
-	print HLA "$optitype -i $f_fq_1 $f_fq_2 -c $f_opti_config --rna -v -o $dir_hla"."\n";
+    print HLA "$optitype -i $f_fq_1 $f_fq_2 -c $f_opti_config --dna -v -o $dir_hla"."\n";
     print HLA "fi\n";
-	print HLA "else\n";
+    print HLA "else\n";
     print HLA "if [ ! -f \${f_optitype_hla} ]\n";
     print HLA "then\n";
     print HLA "if [ -d $dir_hla ]","\n";
@@ -376,9 +376,9 @@ sub bsub_hla{
     print HLA "then\n";
     print HLA "f_optitype_hla=`find $dir_hla -name '*tsv'`","\n";
     print HLA "fi\n";
-	print HLA "if [ ! -z \${f_optitype_hla} ] && [  -f \${f_optitype_hla} ]\n";	
+    print HLA "if [ ! -z \${f_optitype_hla} ] && [  -f \${f_optitype_hla} ]\n";	
     print HLA "then\n"; 
- 	print HLA  " ".$run_script_path_perl."parseHLAresult.pl \${f_optitype_hla} \${HLA_tsv}"."\n";
+    print HLA  " ".$run_script_path_perl."parseHLAresult.pl \${f_optitype_hla} \${HLA_tsv}"."\n";
 	print HLA "fi\n";
    	close HLA;
     my $sh_file=$job_files_dir."/".$current_job_file;
