@@ -112,7 +112,7 @@ my $lsf_file_dir = $HOME1."/LSF_DIR_Neo";
 ## hlaminer for genotype, netMHC for neoantigen prediction ##
 
 my $db_hla_abc_cds="/gscmnt/gc2523/dinglab/neoantigen/human_DB/HLA_ABC_CDS.fasta";
-my $optitype="/gscmnt/gc2518/dinglab/scao/home/tools/anaconda3/bin/OptiTypePipeline.py"; 
+my $optitype="OptiTypePipeline.py"; 
 my $f_allele="/gscmnt/gc2523/dinglab/neoantigen/netMHC-4.0/Linux_x86_64/data/allelelist";
 my $netMHC="/gscmnt/gc2523/dinglab/neoantigen/netMHC-4.0/netMHC";
 my $samtools="/storage1/fs1/songcao/Active/Software/anaconda3/bin/samtools";
@@ -331,7 +331,7 @@ sub bsub_hla{
     print HLA "then\n";
     print HLA 'if [ -f $IN_bam ]',"\n"; # input file exist
     print HLA "then\n";
-    #print HLA "$samtools sort -n \${HLA_IN} -o \${HLA_sorted_bam}","\n";
+    print HLA "$samtools sort -n \${HLA_IN} -o \${HLA_sorted_bam}","\n";
     print HLA "$samtools view \${HLA_sorted_bam} | perl -ne \'\$l=\$_; \$f_q1=\"$f_fq_1\"; \$f_q2=\"$f_fq_2\"; if(\$first==0) { open(OUT1,\">\$f_q1\"); open(OUT2,\">\$f_q2\");  \$first=1;}  \@ss=split(\"\\t\",\$l); \$flag=\$ss[1]; \$cigar=\$ss[5]; if((\$flag & 0x100) || (\$flag & 0x800) || (\$cigar=~/H/)) { next; } \$id=\$ss[0]; \$seq=\$ss[9]; \$q=\$ss[10];  if(\$id=~/\\/1\$/ || (\$flag & 0x40) ) { \$r1=\$id; \$r1=~s/\\/1\$//g; \$seq1=\$seq; \$q1=\$q; } if(\$id=~/\\/2\$/ || (\$flag & 0x80)) { \$r2=\$id; \$r2=~s/\\/2\$//g; \$seq2=\$seq; \$q2=\$q; } if((\$r1 eq \$r2)) { print OUT1 \"\@\",\$r1,\"/1\",\"\\n\"; print OUT1 \$seq1,\"\\n\"; print OUT1 \"+\",\"\\n\"; print OUT1 \$q1,\"\\n\"; print OUT2 \"\@\",\$r1,\"/2\",\"\\n\"; print OUT2 \$seq2,\"\\n\"; print OUT2 \"+\",\"\\n\"; print OUT2 \$q2,\"\\n\";}\'","\n";
     print HLA "  fi\n";
     print HLA "fi\n"; 
@@ -349,7 +349,7 @@ sub bsub_hla{
     print HLA "then\n";
     print HLA "rm -rf $dir_hla\n";   
     print HLA "fi\n";
-    print HLA "$optitype -i $f_fq_1 $f_fq_2 -c $f_opti_config --dna -v -o $dir_hla"."\n";
+    print HLA "$optitype -i $f_fq_1 $f_fq_2 -r -o $dir_hla"."\n";
     print HLA "fi\n";
     print HLA "else\n";
     print HLA "if [ ! -f \${f_optitype_hla} ]\n";
@@ -357,8 +357,9 @@ sub bsub_hla{
     print HLA "if [ -d $dir_hla ]","\n";
     print HLA "then\n";
 	print HLA "rm -rf $dir_hla\n";	
-    print HLA "fi\n";  	
-   	print HLA "$optitype -i $f_fq_1 $f_fq_2 -c $f_opti_config --dna -v -o $dir_hla"."\n";
+    print HLA "fi\n";  
+        print HLA "$optitype -i $f_fq_1 $f_fq_2 -d -o $dir_hla"."\n";	
+  	#print HLA "$optitype -i $f_fq_1 $f_fq_2 -c $f_opti_config --dna -v -o $dir_hla"."\n";
 	print HLA "  fi\n";	
     print HLA "  fi\n";	
  	print HLA "if [ -d $dir_hla ]","\n";
@@ -382,7 +383,7 @@ sub bsub_hla{
 	print HLA "fi\n";
    	close HLA;
     my $sh_file=$job_files_dir."/".$current_job_file;
-    $bsub_com = "bsub -q dinglab -n 1 -R \"select[mem>200000] rusage[mem=200000]\" -M 200000000 -a \'docker(ubuntu)\' -o $lsf_out -e $lsf_err \'sh $sh_file\'\n";
+    $bsub_com = "LSF_DOCKER_ENTRYPOINT=/bin/bash LSF_DOCKER_PRESERVE_ENVIRONMENT=false bsub -q dinglab -n 1 -R \"select[mem>200000] rusage[mem=200000]\" -M 200000000 -a \'docker(fred2/optitype)\' -o $lsf_out -e $lsf_err \'sh $sh_file\'\n";
     system ( $bsub_com );
 
 	}
@@ -405,7 +406,6 @@ sub bsub_netmhc{
 	open(MHC, ">$job_files_dir/$current_job_file") or die $!;
     print MHC "#!/bin/bash\n";
     #print MHC "#BSUB -n 1\n";
-    #print MHC "#BSUB -R \"rusage[mem=30000]\"","\n";
     #print MHC "#BSUB -M 30000000\n";
 	#print MHC "#BSUB -q ding-lab\n";
    # print MHC "#BSUB -o $lsf_file_dir","/","$current_job_file.out\n";
