@@ -61,10 +61,12 @@ my $hla = 1;
 my $s_bam_fq =1; 
 my $s_rna=1; 
 
-my $db_ref_bed="/gscmnt/gc2518/dinglab/scao/db/ensembl38.85/proteome-first.bed";
+#my $db_ref_bed="/gscmnt/gc2518/dinglab/scao/db/ensembl38.85/proteome-first.bed";
 #my $db_ref_bed="/gscmnt/gc2518/dinglab/scao/db/refseq_hg38_june29/proteome.bed";
-my $h38_fa="/gscmnt/gc2518/dinglab/scao/db/refseq_hg38_june29";
- 
+#my $h38_fa="/gscmnt/gc2518/dinglab/scao/db/refseq_hg38_june29";
+
+my $db_ref_bed;
+my $h38_fa; 
 my $status = &GetOptions (
       "step=i" => \$step_number,
 	  "rdir=s" => \$run_dir,
@@ -111,14 +113,14 @@ my $lsf_file_dir = $HOME1."/LSF_DIR_Neo";
 
 ## hlaminer for genotype, netMHC for neoantigen prediction ##
 
-my $db_hla_abc_cds="/gscmnt/gc2523/dinglab/neoantigen/human_DB/HLA_ABC_CDS.fasta";
+#my $db_hla_abc_cds="/gscmnt/gc2523/dinglab/neoantigen/human_DB/HLA_ABC_CDS.fasta";
 my $optitype="OptiTypePipeline.py"; 
-my $f_allele="/gscmnt/gc2523/dinglab/neoantigen/netMHC-4.0/Linux_x86_64/data/allelelist";
-my $netMHC="/gscmnt/gc2523/dinglab/neoantigen/netMHC-4.0/netMHC";
+my $f_allele="/storage1/fs1/songcao/Active/Software/netMHC-4.0/Linux_x86_64/data/allelelist";
+my $netMHC="/storage1/fs1/songcao/Active/Software/netMHC-4.0/netMHC";
 my $samtools="/storage1/fs1/songcao/Active/Software/anaconda3/bin/samtools";
 #my $db_ref_bed="/gscmnt/gc2518/dinglab/scao/db/refseq_hg38_june29/proteome.bed";
 #my $h38_fa="/gscmnt/gc2518/dinglab/scao/db/refseq_hg38_june29";
-my $f_opti_config = "/gscmnt/gc2518/dinglab/scao/home/git/neoscan/config.ini";
+#my $f_opti_config = "/gscmnt/gc2518/dinglab/scao/home/git/neoscan/config.ini";
  
 #my $db_cdna="/gscmnt/gc3027/dinglab/medseq/fasta/human/Homo_sapiens.GRCh37.70.cdna.all.fa";
 #my $db_sanger_qs="/gscmnt/gc2523/dinglab/neoantigen/neoantigen-scan/quality_sanger.table.2col.tsv";
@@ -126,7 +128,10 @@ my $f_opti_config = "/gscmnt/gc2518/dinglab/scao/home/git/neoscan/config.ini";
 my $run_script_path = `dirname $0`;
 chomp $run_script_path;
 my $run_script_path_perl = "/usr/bin/perl ".$run_script_path."/";
+#my $run_script_path_python = "/storage1/fs1/songcao/Active/Software/anaconda3/bin/python ".$run_script_path."/";
 my $run_script_path_python = "/usr/bin/python ".$run_script_path."/";
+
+#/usr/bin/python
 #my $hold_RM_job = "norm";
 my $current_job_file = "";#cannot be empty
 my $hold_job_file = "";
@@ -189,7 +194,7 @@ sub bsub_fa{
    # print FA "#BSUB -o $lsf_file_dir","/","$current_job_file.out\n";
    # print FA "#BSUB -e $lsf_file_dir","/","$current_job_file.err\n";
    # print FA "#BSUB -q ding-lab\n";
-	print FA "#BSUB -J $current_job_file\n";
+   print FA "#BSUB -J $current_job_file\n";
    # print FA "#BSUB -w \"$hold_job_file\"","\n";
     print FA "f_vcf_indel=".$sample_full_path."/$sample_name.indel.vcf\n";
     print FA "f_vcf_snp=".$sample_full_path."/$sample_name.snp.vcf\n";
@@ -213,7 +218,9 @@ sub bsub_fa{
     #$bsub_com = "bsub < $job_files_dir/$current_job_file\n";
     my $sh_file=$job_files_dir."/".$current_job_file;
 
-    $bsub_com = "bsub -q dinglab -n 1 -R \"select[mem>30000] rusage[mem=30000]\" -M 30000000 -a \'docker(registry.gsc.wustl.edu/genome/genome_perl_environment)\' -o $lsf_out -e $lsf_err sh $sh_file\n"; 
+    $bsub_com = "bsub -q general -n 1 -R \"select[mem>20000] rusage[mem=20000]\" -M 20000000 -a \'docker(ubuntu)\' -o $lsf_out -e $lsf_err \'sh $sh_file\'\n";
+
+    #$bsub_com = "bsub -q dinglab -n 1 -R \"select[mem>30000] rusage[mem=30000]\" -M 30000000 -a \'docker(registry.gsc.wustl.edu/genome/genome_perl_environment)\' -o $lsf_out -e $lsf_err sh $sh_file\n"; 
 
     system ( $bsub_com );
 }
@@ -271,7 +278,7 @@ sub bsub_pep{
     my $sh_file=$job_files_dir."/".$current_job_file;
 
    # $bsub_com = "bsub -q dinglab -n 1 -R \"select[mem>30000] rusage[mem=30000]\" -M 30000000 -a \'docker(registry.gsc.wustl.edu/genome/genome_perl_environment)\' -w $hold_job_file -o $lsf_out -e $lsf_err sh $sh_file\n"; 
-    $bsub_com = "bsub -q dinglab -n 1 -R \"select[mem>30000] rusage[mem=30000]\" -M 30000000 -a \'docker(registry.gsc.wustl.edu/genome/genome_perl_environment)\' -o $lsf_out -e $lsf_err sh $sh_file\n";
+    $bsub_com = "bsub -q general -n 1 -R \"select[mem>20000] rusage[mem=20000]\" -M 20000000 -a \'docker(ubuntu)\' -o $lsf_out -e $lsf_err sh $sh_file\n";
    #$bsub_com = "bsub < $job_files_dir/$current_job_file\n";
     system ( $bsub_com );
 }
@@ -388,6 +395,7 @@ sub bsub_hla{
 
 	}
 
+### calculating binding affinity between epitopes and MHC ##
 sub bsub_netmhc{
 
     my ($step_by_step) = @_;
@@ -396,47 +404,39 @@ sub bsub_netmhc{
     }else{
         $hold_job_file = $current_job_file;
     }
-    #my $cdhitReport = $sample_full_path."/".$sample_name.".fa.cdhitReport";
     $current_job_file = "j4_bind_".$sample_name.".sh";
     my $lsf_out=$lsf_file_dir."/".$current_job_file.".out";
     my $lsf_err=$lsf_file_dir."/".$current_job_file.".err";
     `rm $lsf_out`;
     `rm $lsf_err`;
-    #my $IN_sam = $sample_full_path."/".$sample_name.".exome.sam"; 
-	open(MHC, ">$job_files_dir/$current_job_file") or die $!;
+    open(MHC, ">$job_files_dir/$current_job_file") or die $!;
     print MHC "#!/bin/bash\n";
-    #print MHC "#BSUB -n 1\n";
-    #print MHC "#BSUB -M 30000000\n";
-	#print MHC "#BSUB -q ding-lab\n";
-   # print MHC "#BSUB -o $lsf_file_dir","/","$current_job_file.out\n";
-   # print MHC "#BSUB -e $lsf_file_dir","/","$current_job_file.err\n";
-   # print MHC "#BSUB -J $current_job_file\n";
-   # print MHC "#BSUB -w \"$hold_job_file\"","\n";
     print MHC "f_pep_indel_wt=".$sample_full_path."/$sample_name.indel.vcf.proteome-indel-wt.fasta\n";
     print MHC "f_pep_indel_mut=".$sample_full_path."/$sample_name.indel.vcf.proteome-indel-mut.fasta\n";
     print MHC "f_pep_snv_wt=".$sample_full_path."/$sample_name.snp.vcf.proteome-snv-wt.fasta\n";
     print MHC "f_pep_snv_mut=".$sample_full_path."/$sample_name.snp.vcf.proteome-snv-mut.fasta\n";
-	print MHC "f_pep_snv_mut_v1=".$sample_full_path."/$sample_name.snp.vcf.proteome-snv-mut.v1.fasta\n";		
-	print MHC "f_pep_snv_mut_v2=".$sample_full_path."/$sample_name.snp.vcf.proteome-snv-mut.v2.fasta\n";		
-#	print MHC "f_pep=".$sample_full_path."/$sample_name.pep.fa\n";
+    print MHC "f_pep_snv_mut_v1=".$sample_full_path."/$sample_name.snp.vcf.proteome-snv-mut.v1.fasta\n";		
+    print MHC "f_pep_snv_mut_v2=".$sample_full_path."/$sample_name.snp.vcf.proteome-snv-mut.v2.fasta\n";		
     print MHC "HLA_tsv=".$sample_full_path."/HLA_alleles.tsv\n";
-	print MHC "f_netMHC_result=".$sample_full_path."/netMHC4.0.out.append.txt\n";
-	print MHC "f_netMHC_result_snv=".$sample_full_path."/netMHC4.0.out.append.snv.txt\n";
-	print MHC "f_netMHC_result_indel=".$sample_full_path."/netMHC4.0.out.append.indel.txt\n";
-	print MHC "f_out=".$sample_full_path."/result_neoantigen\n";
- 	print MHC " ".$run_script_path_perl."generate_mut_peptide_snv.pl $db_ref_bed \${f_pep_snv_wt} \${f_pep_snv_mut} \${f_pep_snv_mut_v1}\n";
-	print MHC " ".$run_script_path_perl."remove_duplicate_mut_peptide_snv.pl \${f_pep_snv_mut_v1} \${f_pep_snv_mut_v2}\n";
+    print MHC "f_netMHC_result=".$sample_full_path."/netMHC4.0.out.append.txt\n";
+    print MHC "f_netMHC_result_snv=".$sample_full_path."/netMHC4.0.out.append.snv.txt\n";
+    print MHC "f_netMHC_result_indel=".$sample_full_path."/netMHC4.0.out.append.indel.txt\n";
+    print MHC "f_out=".$sample_full_path."/result_neoantigen\n";
+    print MHC " ".$run_script_path_perl."generate_mut_peptide_snv.pl $db_ref_bed \${f_pep_snv_wt} \${f_pep_snv_mut} \${f_pep_snv_mut_v1}\n";
+    print MHC " ".$run_script_path_perl."remove_duplicate_mut_peptide_snv.pl \${f_pep_snv_mut_v1} \${f_pep_snv_mut_v2}\n";
     print MHC  " ".$run_script_path_python."runNetMHC4.py -a \${HLA_tsv} -f \${f_pep_snv_mut_v2} -p 8,9,10,11 -o $sample_full_path -n $netMHC -v $f_allele"."\n";
-	print MHC "mv \${f_netMHC_result} \${f_netMHC_result_snv}\n"; 
-	print MHC  " ".$run_script_path_python."runNetMHC4.py -a \${HLA_tsv} -f \${f_pep_indel_mut} -p 8,9,10,11 -o $sample_full_path -n $netMHC -v $f_allele"."\n";
-	print MHC "mv \${f_netMHC_result} \${f_netMHC_result_indel}\n";
+    print MHC "mv \${f_netMHC_result} \${f_netMHC_result_snv}\n"; 
+    print MHC  " ".$run_script_path_python."runNetMHC4.py -a \${HLA_tsv} -f \${f_pep_indel_mut} -p 8,9,10,11 -o $sample_full_path -n $netMHC -v $f_allele"."\n";
+    print MHC "mv \${f_netMHC_result} \${f_netMHC_result_indel}\n";
     close MHC;
 
     my $sh_file=$job_files_dir."/".$current_job_file;
 
-  #  $bsub_com = "bsub -q dinglab -n 1 -R \"select[mem>30000] rusage[mem=30000]\" -M 30000000 -a \'docker(registry.gsc.wustl.edu/genome/genome_perl_environment)\' -o $lsf_out -e $lsf_err sh $sh_file\n";
+    $bsub_com = "LSF_DOCKER_PRESERVE_ENVIRONMENT=false bsub -q general -n 1 -R \"select[mem>20000] rusage[mem=20000]\" -M 20000000 -a \'docker(scao/dailybox)\' -o $lsf_out -e $lsf_err sh $sh_file\n";
+   #$bsub_com = "bsub < $job_files_dir/$current_job_file\n";
+   #    system ( $bsub_com );
 
-    $bsub_com = "LSF_DOCKER_PRESERVE_ENVIRONMENT=false bsub -q dinglab -n 1 -R \"select[mem>30000] rusage[mem=30000]\" -M 30000000 -a \'docker(scao/dailybox)\' -o $lsf_out -e $lsf_err sh $sh_file\n";
+#    $bsub_com = "LSF_DOCKER_PRESERVE_ENVIRONMENT=false bsub -q dinglab -n 1 -R \"select[mem>30000] rusage[mem=30000]\" -M 30000000 -a \'docker(scao/dailybox)\' -o $lsf_out -e $lsf_err sh $sh_file\n";
 
     system ( $bsub_com );
 	
@@ -486,8 +486,9 @@ sub bsub_parsemhc{
     print PMHC  " ".$run_script_path_perl."reportSummary.pl \${f_indel_out} \${f_indel} \${f_snv} \${f_indel_mut_fa} \${f_snv_mut_fa} \${f_indel_sum}"."\n";
 	close PMHC;
     my $sh_file=$job_files_dir."/".$current_job_file;
+    $bsub_com = "bsub -q general -n 1 -R \"select[mem>20000] rusage[mem=20000]\" -M 20000000 -a \'docker(ubuntu)\' -o $lsf_out -e $lsf_err sh $sh_file\n";
 
-    $bsub_com = "bsub -q dinglab -n 1 -R \"select[mem>30000] rusage[mem=30000]\" -M 30000000 -a \'docker(registry.gsc.wustl.edu/genome/genome_perl_environment)\' -w \"$hold_job_file\" -o $lsf_out -e $lsf_err sh $sh_file\n";
+    #$bsub_com = "bsub -q dinglab -n 1 -R \"select[mem>30000] rusage[mem=30000]\" -M 30000000 -a \'docker(registry.gsc.wustl.edu/genome/genome_perl_environment)\' -w \"$hold_job_file\" -o $lsf_out -e $lsf_err sh $sh_file\n";
     system ( $bsub_com );
 }
 
@@ -527,7 +528,8 @@ sub bsub_final_report()
 
     my $sh_file=$job_files_dir."/".$current_job_file;
    # $bsub_com = "bsub -q dinglab -n 1 -R \"select[mem>30000] rusage[mem=30000]\" -M 30000000 -a \'docker(registry.gsc.wustl.edu/genome/genome_perl_environment)\' -w $hold_job_file -o $lsf_out -e $lsf_err sh $sh_file\n"; 
-    $bsub_com = "bsub -q dinglab -n 1 -R \"select[mem>30000] rusage[mem=30000]\" -M 30000000 -a \'docker(registry.gsc.wustl.edu/genome/genome_perl_environment)\' -w \"$hold_job_file\" -o $lsf_out -e $lsf_err sh $sh_file\n";
+    $bsub_com = "bsub -q general -n 1 -R \"select[mem>20000] rusage[mem=20000]\" -M 20000000 -a \'docker(ubuntu)\' -o $lsf_out -e $lsf_err sh $sh_file\n";
+    #$bsub_com = "bsub -q dinglab -n 1 -R \"select[mem>30000] rusage[mem=30000]\" -M 30000000 -a \'docker(registry.gsc.wustl.edu/genome/genome_perl_environment)\' -w \"$hold_job_file\" -o $lsf_out -e $lsf_err sh $sh_file\n";
    #$bsub_com = "bsub < $job_files_dir/$current_job_file\n";
     system ( $bsub_com );
     

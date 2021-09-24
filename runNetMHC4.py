@@ -32,7 +32,6 @@ def usage():
 
     Version:                    1.0.0
           """
-
 #parameters
 hla_allele_file = ''
 all_peptide_file = ''
