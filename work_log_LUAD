@@ -74,3 +74,14 @@ perl neoscan.pl --rdir /gscmnt/gc2533/dinglab/scao/cptac-neo/LUAD/work2 --log /g
 perl neoscan.pl --rdir /gscmnt/gc2533/dinglab/scao/cptac-neo/LUAD/work3 --log /gscmnt/gc2533/dinglab/scao/cptac-neo/LUAD.log --bam 1 --bed /gscmnt/gc2518/dinglab/scao/db/refseq_hg38_june29/proteome.bed --rna 0 --refdir /gscmnt/gc2518/dinglab/scao/db/refseq_hg38_june29 --step 5
 
 perl neoscan.pl --rdir /gscmnt/gc2533/dinglab/scao/cptac-neo/LUAD/work4 --log /gscmnt/gc2533/dinglab/scao/cptac-neo/LUAD.log --bam 1 --bed /gscmnt/gc2518/dinglab/scao/db/refseq_hg38_june29/proteome.bed --rna 0 --refdir /gscmnt/gc2518/dinglab/scao/db/refseq_hg38_june29 --step 5
+
+## step 6
+perl neoscan.pl --rdir /gscmnt/gc2533/dinglab/scao/cptac-neo/LUAD/work0 --log /gscmnt/gc2533/dinglab/scao/cptac-neo/LUAD.log --bam 1 --bed /gscmnt/gc2518/dinglab/scao/db/refseq_hg38_june29/proteome.bed --rna 0 --refdir /gscmnt/gc2518/dinglab/scao/db/refseq_hg38_june29 --step 6
+
+perl neoscan.pl --rdir /gscmnt/gc2533/dinglab/scao/cptac-neo/LUAD/work1 --log /gscmnt/gc2533/dinglab/scao/cptac-neo/LUAD.log --bam 1 --bed /gscmnt/gc2518/dinglab/scao/db/refseq_hg38_june29/proteome.bed --rna 0 --refdir /gscmnt/gc2518/dinglab/scao/db/refseq_hg38_june29 --step 6
+
+perl neoscan.pl --rdir /gscmnt/gc2533/dinglab/scao/cptac-neo/LUAD/work2 --log /gscmnt/gc2533/dinglab/scao/cptac-neo/LUAD.log --bam 1 --bed /gscmnt/gc2518/dinglab/scao/db/refseq_hg38_june29/proteome.bed --rna 0 --refdir /gscmnt/gc2518/dinglab/scao/db/refseq_hg38_june29 --step 6
+
+perl neoscan.pl --rdir /gscmnt/gc2533/dinglab/scao/cptac-neo/LUAD/work3 --log /gscmnt/gc2533/dinglab/scao/cptac-neo/LUAD.log --bam 1 --bed /gscmnt/gc2518/dinglab/scao/db/refseq_hg38_june29/proteome.bed --rna 0 --refdir /gscmnt/gc2518/dinglab/scao/db/refseq_hg38_june29 --step 6
+
+perl neoscan.pl --rdir /gscmnt/gc2533/dinglab/scao/cptac-neo/LUAD/work4 --log /gscmnt/gc2533/dinglab/scao/cptac-neo/LUAD.log --bam 1 --bed /gscmnt/gc2518/dinglab/scao/db/refseq_hg38_june29/proteome.bed --rna 0 --refdir /gscmnt/gc2518/dinglab/scao/db/refseq_hg38_june29 --step 6

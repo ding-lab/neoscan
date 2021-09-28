@@ -441,14 +441,43 @@ sub bsub_netmhc{
 	print MHC "f_netMHC_result=".$sample_full_path."/netMHC4.0.out.append.txt\n";
 	print MHC "f_netMHC_result_snv=".$sample_full_path."/netMHC4.0.out.append.snv.txt\n";
 	print MHC "f_netMHC_result_indel=".$sample_full_path."/netMHC4.0.out.append.indel.txt\n";
-	print MHC "f_out=".$sample_full_path."/result_neoantigen\n";
+	#print MHC "f_out=".$sample_full_path."/result_neoantigen\n";
  	print MHC " ".$run_script_path_perl."generate_mut_peptide_snv.pl $db_ref_bed \${f_pep_snv_wt} \${f_pep_snv_mut} \${f_pep_snv_mut_v1}\n";
 	print MHC " ".$run_script_path_perl."remove_duplicate_mut_peptide_snv.pl \${f_pep_snv_mut_v1} \${f_pep_snv_mut_v2}\n";
     print MHC  " ".$run_script_path_python."runNetMHC4.py -a \${HLA_tsv} -f \${f_pep_snv_mut_v2} -p 8,9,10,11 -o $sample_full_path -n $netMHC -v $f_allele"."\n";
 	print MHC "mv \${f_netMHC_result} \${f_netMHC_result_snv}\n"; 
 	print MHC  " ".$run_script_path_python."runNetMHC4.py -a \${HLA_tsv} -f \${f_pep_indel_mut} -p 8,9,10,11 -o $sample_full_path -n $netMHC -v $f_allele"."\n";
 	print MHC "mv \${f_netMHC_result} \${f_netMHC_result_indel}\n";
-    close MHC;
+
+### check if netMHC prediction is successfully finished, indel    
+	print MHC 'if [ -f $f_netMHC_result_indel ] ',"\n"; # file exist 
+	print MHC "then\n";
+	print MHC '	grep "Error" ${f_netMHC_result_indel}',"\n";  
+	print MHC '	CHECK=$?',"\n";
+	print MHC '	while [ ${CHECK} -eq 0 ] ',"\n"; # grep success, file not finish
+	print MHC "	do\n";
+    print MHC  " ".$run_script_path_python."runNetMHC4.py -a \${HLA_tsv} -f \${f_pep_indel_mut} -p 8,9,10,11 -o $sample_full_path -n $netMHC -v $f_allele"."\n";
+    print MHC "mv \${f_netMHC_result} \${f_netMHC_result_indel}\n";
+	print MHC '		grep "Error" ${f_netMHC_result_indel}',"\n";
+	print MHC '		CHECK=$?',"\n";
+	print MHC "	done\n";
+ 	print MHC "     fi\n";	
+
+### check if netMHC prediction is successfully finished, indel    
+    print MHC 'if [ -f $f_netMHC_result_snv ] ',"\n"; # file exist 
+    print MHC "then\n";
+    print MHC ' grep "Error" ${f_netMHC_result_snv}',"\n";
+    print MHC ' CHECK=$?',"\n";
+    print MHC ' while [ ${CHECK} -eq 0 ] ',"\n"; # grep success, file not finish
+    print MHC " do\n";
+    print MHC  " ".$run_script_path_python."runNetMHC4.py -a \${HLA_tsv} -f \${f_pep_snv_mut_v2} -p 8,9,10,11 -o $sample_full_path -n $netMHC -v $f_allele"."\n";
+    print MHC "mv \${f_netMHC_result} \${f_netMHC_result_snv}\n";    
+	print MHC '     grep "Error" ${f_netMHC_result_snv}',"\n";
+    print MHC '     CHECK=$?',"\n";
+    print MHC " done\n";
+    print MHC "     fi\n";
+
+	close MHC;
 
     my $sh_file=$job_files_dir."/".$current_job_file;
 
