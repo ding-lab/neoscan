@@ -430,6 +430,8 @@ sub bsub_netmhc{
     print MHC "mv \${f_netMHC_result} \${f_netMHC_result_indel}\n";
 
 ### check if netMHC prediction is successfully finished, indel
+    print MHC 'if [ -s $f_pep_indel_mut ] ',"\n"; # file exist  
+    print MHC "then\n";
     print MHC 'if [ -f $f_netMHC_result_indel ] ',"\n"; # file exist
     print MHC "then\n";
     print MHC ' grep "Error" ${f_netMHC_result_indel}',"\n";
@@ -442,7 +444,11 @@ sub bsub_netmhc{
     print MHC '     CHECK=$?',"\n";
     print MHC " done\n";
     print MHC "     fi\n";
+    print MHC "     fi\n";
 ### check if netMHC prediction is successfully finished, snv  
+   
+    print MHC 'if [ -s $f_pep_snv_mut_v2 ] ',"\n"; # file exist  
+    print MHC "then\n"; 
     print MHC 'if [ -f $f_netMHC_result_snv ] ',"\n"; # file exist
     print MHC "then\n";
     print MHC ' grep "Error" ${f_netMHC_result_snv}',"\n";
@@ -455,7 +461,7 @@ sub bsub_netmhc{
     print MHC '     CHECK=$?',"\n";
     print MHC " done\n";
     print MHC "     fi\n";
-
+    print MHC "     fi\n";
     close MHC;
 
     my $sh_file=$job_files_dir."/".$current_job_file;
