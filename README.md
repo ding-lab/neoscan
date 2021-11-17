@@ -8,6 +8,19 @@ Install netMHC4 by following http://www.cbs.dtu.dk/services/doc/netMHC-4.0.readm
 
 ## Usage ##
 
+Step 0: 
+set environment for LSF job on compute1 by adding the following to ~/.bashrc file:
+
+export PATH=/storage1/fs1/songcao/Active/Software/anaconda3/bin:$PATH
+
+export STORAGE2=/storage1/fs1/dinglab/Active export SCRATCH2=/storage1/fs1/dinglab/
+
+export STORAGE1=/storage1/fs1/songcao/Active export SCRATCH1=/storage1/fs1/songcao/
+
+export LSF_DOCKER_VOLUMES="$STORAGE1:$STORAGE1 $STORAGE2:$STORAGE2"
+
+step 2: Enter the directory where you downloaded neoscan pipeline, and run it step by step (total 7 steps)
+
 perl neoscan.pl --rdir <rdir> --log <log> --bamfq <bamfq> --bed <bed> --rna <rna> --refdir <refdir> --step <step_number>
 
         <rdir> = full path of the folder holding files for this sequence run
