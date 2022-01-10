@@ -27,7 +27,7 @@ my $normal = "\e[0m";
 This script will predict neoantigen for somatic variants in cancer sample 
 Pipeline version: $version
 
-$yellow     Usage: perl $0 --rdir --log --bamfq --bed --step --rna --refdir $normal
+$yellow     Usage: perl $0 --rdir --log --bamfq --bed --step --rna --refdir --q --groupname --users $normal
 
 <rdir> = full path of the folder holding files for this sequence run
 
@@ -41,6 +41,12 @@ $yellow     Usage: perl $0 --rdir --log --bamfq --bed --step --rna --refdir $nor
 								 refseq: /gscmnt/gc2518/dinglab/scao/db/refseq_hg38_june29/proteome.bed
  
 <refdir> = ref directory: /gscmnt/gc2518/dinglab/scao/db/refseq_hg38_june29
+
+<groupname> = job group name
+
+<users> = user name for job group
+
+<q> which queue for submitting job; research-hpc, ding-lab, long (default)
  
 <step_number> run this pipeline step by step. (running the whole pipeline if step number is 0)
 
@@ -60,7 +66,9 @@ my $log_dir="";
 my $hla = 1; 
 my $s_bam_fq =1; 
 my $s_rna=1; 
-
+my $compute_username="";
+my $group_name="";
+my $q_name="";
 #my $db_ref_bed="/gscmnt/gc2518/dinglab/scao/db/ensembl38.85/proteome-first.bed";
 #my $db_ref_bed="/gscmnt/gc2518/dinglab/scao/db/refseq_hg38_june29/proteome.bed";
 #my $h38_fa="/gscmnt/gc2518/dinglab/scao/db/refseq_hg38_june29";
@@ -72,13 +80,16 @@ my $status = &GetOptions (
 	  "rdir=s" => \$run_dir,
 	  "bed=s" => \$db_ref_bed,
 	  "refdir=s" => \$h38_fa,
+              "groupname=s" => \$group_name,
+      "users=s" => \$compute_username,
+    "q=s" => \$q_name,
  	  "bam=i" => \$s_bam_fq,
 	  "rna=i" => \$s_rna,		
       "log=s"  => \$log_dir,
 	  "help" => \$help
     );
 
-if ($help || $run_dir eq "" || $log_dir eq "" || $step_number<0) {
+if ($help || $run_dir eq "" || $log_dir eq "" || $group_name eq "" || $compute_username eq "" || $step_number<0) {
       print $usage;
       exit;
    }
@@ -218,7 +229,7 @@ sub bsub_fa{
     #$bsub_com = "bsub < $job_files_dir/$current_job_file\n";
     my $sh_file=$job_files_dir."/".$current_job_file;
 
-    $bsub_com = "bsub -q general -n 1 -R \"select[mem>20000] rusage[mem=20000]\" -M 20000000 -a \'docker(ubuntu)\' -o $lsf_out -e $lsf_err \'sh $sh_file\'\n";
+    $bsub_com = "bsub -g /$compute_username/$group_name -q $q_name -n 1 -R \"select[mem>20000] rusage[mem=20000]\" -M 20000000 -a \'docker(ubuntu)\' -o $lsf_out -e $lsf_err \'sh $sh_file\'\n";
 
     #$bsub_com = "bsub -q dinglab -n 1 -R \"select[mem>30000] rusage[mem=30000]\" -M 30000000 -a \'docker(registry.gsc.wustl.edu/genome/genome_perl_environment)\' -o $lsf_out -e $lsf_err sh $sh_file\n"; 
 
@@ -278,7 +289,7 @@ sub bsub_pep{
     my $sh_file=$job_files_dir."/".$current_job_file;
 
    # $bsub_com = "bsub -q dinglab -n 1 -R \"select[mem>30000] rusage[mem=30000]\" -M 30000000 -a \'docker(registry.gsc.wustl.edu/genome/genome_perl_environment)\' -w $hold_job_file -o $lsf_out -e $lsf_err sh $sh_file\n"; 
-    $bsub_com = "bsub -q general -n 1 -R \"select[mem>20000] rusage[mem=20000]\" -M 20000000 -a \'docker(ubuntu)\' -o $lsf_out -e $lsf_err sh $sh_file\n";
+    $bsub_com = "bsub -g /$compute_username/$group_name -q $q_name -n 1 -R \"select[mem>20000] rusage[mem=20000]\" -M 20000000 -a \'docker(ubuntu)\' -o $lsf_out -e $lsf_err sh $sh_file\n";
    #$bsub_com = "bsub < $job_files_dir/$current_job_file\n";
     system ( $bsub_com );
 }
@@ -390,7 +401,7 @@ sub bsub_hla{
 	print HLA "fi\n";
    	close HLA;
     my $sh_file=$job_files_dir."/".$current_job_file;
-    $bsub_com = "LSF_DOCKER_ENTRYPOINT=/bin/bash LSF_DOCKER_PRESERVE_ENVIRONMENT=false bsub -q dinglab -n 1 -R \"select[mem>200000] rusage[mem=200000]\" -M 200000000 -a \'docker(fred2/optitype)\' -o $lsf_out -e $lsf_err \'sh $sh_file\'\n";
+    $bsub_com = "LSF_DOCKER_ENTRYPOINT=/bin/bash LSF_DOCKER_PRESERVE_ENVIRONMENT=false bsub -g /$compute_username/$group_name -q $q_name -n 1 -R \"select[mem>200000] rusage[mem=200000]\" -M 200000000 -a \'docker(fred2/optitype)\' -o $lsf_out -e $lsf_err \'sh $sh_file\'\n";
     system ( $bsub_com );
 
 	}
@@ -466,7 +477,7 @@ sub bsub_netmhc{
 
     my $sh_file=$job_files_dir."/".$current_job_file;
 
-    $bsub_com = "LSF_DOCKER_PRESERVE_ENVIRONMENT=false bsub -q general -n 1 -R \"select[mem>20000] rusage[mem=20000]\" -M 20000000 -a \'docker(scao/dailybox)\' -o $lsf_out -e $lsf_err sh $sh_file\n";
+    $bsub_com = "LSF_DOCKER_PRESERVE_ENVIRONMENT=false bsub -g /$compute_username/$group_name -q $q_name -n 1 -R \"select[mem>20000] rusage[mem=20000]\" -M 20000000 -a \'docker(scao/dailybox)\' -o $lsf_out -e $lsf_err sh $sh_file\n";
    #$bsub_com = "bsub < $job_files_dir/$current_job_file\n";
    #    system ( $bsub_com );
 
@@ -520,7 +531,7 @@ sub bsub_parsemhc{
     print PMHC  " ".$run_script_path_perl."reportSummary.pl \${f_indel_out} \${f_indel} \${f_snv} \${f_indel_mut_fa} \${f_snv_mut_fa} \${f_indel_sum}"."\n";
 	close PMHC;
     my $sh_file=$job_files_dir."/".$current_job_file;
-    $bsub_com = "bsub -q general -n 1 -R \"select[mem>20000] rusage[mem=20000]\" -M 20000000 -a \'docker(ubuntu)\' -o $lsf_out -e $lsf_err sh $sh_file\n";
+    $bsub_com = "bsub -g /$compute_username/$group_name -q $q_name -n 1 -R \"select[mem>20000] rusage[mem=20000]\" -M 20000000 -a \'docker(ubuntu)\' -o $lsf_out -e $lsf_err sh $sh_file\n";
 
     #$bsub_com = "bsub -q dinglab -n 1 -R \"select[mem>30000] rusage[mem=30000]\" -M 30000000 -a \'docker(registry.gsc.wustl.edu/genome/genome_perl_environment)\' -w \"$hold_job_file\" -o $lsf_out -e $lsf_err sh $sh_file\n";
     system ( $bsub_com );
@@ -562,7 +573,7 @@ sub bsub_final_report()
 
     my $sh_file=$job_files_dir."/".$current_job_file;
    # $bsub_com = "bsub -q dinglab -n 1 -R \"select[mem>30000] rusage[mem=30000]\" -M 30000000 -a \'docker(registry.gsc.wustl.edu/genome/genome_perl_environment)\' -w $hold_job_file -o $lsf_out -e $lsf_err sh $sh_file\n"; 
-    $bsub_com = "bsub -q general -n 1 -R \"select[mem>20000] rusage[mem=20000]\" -M 20000000 -a \'docker(ubuntu)\' -o $lsf_out -e $lsf_err sh $sh_file\n";
+    $bsub_com = "bsub -g /$compute_username/$group_name -q $q_name -n 1 -R \"select[mem>20000] rusage[mem=20000]\" -M 20000000 -a \'docker(ubuntu)\' -o $lsf_out -e $lsf_err sh $sh_file\n";
     #$bsub_com = "bsub -q dinglab -n 1 -R \"select[mem>30000] rusage[mem=30000]\" -M 30000000 -a \'docker(registry.gsc.wustl.edu/genome/genome_perl_environment)\' -w \"$hold_job_file\" -o $lsf_out -e $lsf_err sh $sh_file\n";
    #$bsub_com = "bsub < $job_files_dir/$current_job_file\n";
     system ( $bsub_com );
