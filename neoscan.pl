@@ -108,6 +108,11 @@ my $working_name= (split(/\//,$run_dir))[-1];
 
 my $HOME1=$log_dir;;
 
+if (! -d $HOME1)
+{
+`mkdir $HOME1`;
+}
+
 #store job files here
 if (! -d $HOME1."/tmpNeo") {
     `mkdir $HOME1"/tmpNeo"`;
@@ -197,7 +202,7 @@ sub bsub_fa{
     `rm $lsf_out`;
     `rm $lsf_err`;
  
-   open(FA, ">$job_files_dir/$current_job_file") or die $!;
+    open(FA, ">$job_files_dir/$current_job_file") or die $!;
     print FA "#!/bin/bash\n";
     #print FA "#BSUB -n 1\n";
     #print FA "#BSUB -R \"rusage[mem=30000]\"","\n";
@@ -205,7 +210,7 @@ sub bsub_fa{
    # print FA "#BSUB -o $lsf_file_dir","/","$current_job_file.out\n";
    # print FA "#BSUB -e $lsf_file_dir","/","$current_job_file.err\n";
    # print FA "#BSUB -q ding-lab\n";
-   print FA "#BSUB -J $current_job_file\n";
+    #print FA "#BSUB -J $current_job_file\n";
    # print FA "#BSUB -w \"$hold_job_file\"","\n";
     print FA "f_vcf_indel=".$sample_full_path."/$sample_name.indel.vcf\n";
     print FA "f_vcf_snp=".$sample_full_path."/$sample_name.snp.vcf\n";
