@@ -21,23 +21,27 @@ export LSF_DOCKER_VOLUMES="$STORAGE1:$STORAGE1 $STORAGE2:$STORAGE2"
 
 step 2: Enter the directory where you downloaded neoscan pipeline, and run it step by step (total 7 steps)
 
-perl neoscan.pl --rdir <rdir> --log <log> --bamfq <bamfq> --bed <bed> --rna <rna> --refdir <refdir> --step <step_number>
+perl neoscan.pl --rdir --log --bamfq --bed --step --rna --refdir --q --groupname --users
 
-        <rdir> = full path of the folder holding files for this sequence run
+ <rdir> = full path of the folder holding files for this sequence run
 
-        <log> = full path of the folder saving log files
+ <log> = full path of the folder saving log files 
 
-        <bamfq> = 1, input is bam; 0, input is fastq: default 1
+ <bam> = 1, input is bam; 0, input is fastq: default 1
 
-        <rna> =1, input data is rna, otherwise is dna. For HLA genotype
+ <rna> =1, input data is rna, otherwise is dna
 
-        <bed> = bed file for annotation: ensembl: /gscmnt/gc2518/dinglab/scao/db/ensembl38.85/proteome-first.bed
+ <bed> = bed file for annotation: refseq: /storage1/fs1/songcao/Active/Database/hg38_database/refseq/refseq_hg38_june29/proteome.bed 
+ 
+ <refdir> = ref directory: /storage1/fs1/songcao/Active/Database/hg38_database/refseq/refseq_hg38_june29
 
-         refseq: /gscmnt/gc2518/dinglab/scao/db/refseq_hg38_june29/proteome.bed
+ <groupname> = job group name
 
-        <refdir> = ref directory: /gscmnt/gc2518/dinglab/scao/db/refseq_hg38_june29
+ <users> = user name for job group
 
-        <step_number> run this pipeline step by step. (running the whole pipeline if step number is 0)
+ <q> = which queue for submitting job; research-hpc, ding-lab, long (default)
+ 
+<step>  =run this pipeline step by step. (running the whole pipeline if step number is 0)
 
 # files required in the running directory ##
  - vcf file format for snvs with columns: chromosome, start position, ref allele, alt allele, gene hugo symbol, HGSV short, is it somatic or germline mutation. Filename: <id>.snp.vcf

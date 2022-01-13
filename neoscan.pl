@@ -37,10 +37,9 @@ $yellow     Usage: perl $0 --rdir --log --bamfq --bed --step --rna --refdir --q 
 
 <rna> =1, input data is rna, otherwise is dna
 
-<bed> = bed file for annotation: ensembl: /gscmnt/gc2518/dinglab/scao/db/ensembl38.85/proteome-first.bed 
-								 refseq: /gscmnt/gc2518/dinglab/scao/db/refseq_hg38_june29/proteome.bed
+<bed> = bed file for annotation: refseq: /storage1/fs1/songcao/Active/Database/hg38_database/refseq/refseq_hg38_june29/proteome.bed
  
-<refdir> = ref directory: /gscmnt/gc2518/dinglab/scao/db/refseq_hg38_june29
+<refdir> = ref directory:  /storage1/fs1/songcao/Active/Database/hg38_database/refseq/refseq_hg38_june29
 
 <groupname> = job group name
 
