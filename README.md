@@ -23,28 +23,28 @@ step 2: Enter the directory where you downloaded neoscan pipeline, and run it st
 
 perl neoscan.pl --rdir --log --bamfq --bed --step --rna --refdir --q --groupname --users
 
- <rdir> = full path of the folder holding files for this sequence run
+ rdir = full path of the folder holding files for this sequence run
 
- <log> = full path of the folder saving log files 
+ log = full path of the folder saving log files 
 
- <bam> = 1, input is bam; 0, input is fastq: default 1
+ bam = 1, input is bam; 0, input is fastq: default 1
 
- <rna> =1, input data is rna, otherwise is dna
+ rna =1, input data is rna, otherwise is dna
 
- <bed> = bed file for annotation: refseq: /storage1/fs1/songcao/Active/Database/hg38_database/refseq/refseq_hg38_june29/proteome.bed 
+ bed = bed file for annotation: refseq: /storage1/fs1/songcao/Active/Database/hg38_database/refseq/refseq_hg38_june29/proteome.bed 
  
- <refdir> = ref directory: /storage1/fs1/songcao/Active/Database/hg38_database/refseq/refseq_hg38_june29
+ refdir = ref directory: /storage1/fs1/songcao/Active/Database/hg38_database/refseq/refseq_hg38_june29
 
- <groupname> = job group name
+ groupname = job group name
 
- <users> = user name for job group
+ users = user name for job group
 
- <q> = which queue for submitting job; research-hpc, ding-lab, long (default)
+ q = which queue for submitting job; research-hpc, ding-lab, long (default)
  
-<step>  =run this pipeline step by step. (running the whole pipeline if step number is 0)
+step  =run this pipeline step by step. (running the whole pipeline if step number is 0)
 
 # files required in the running directory ##
- - vcf file format for snvs with columns: chromosome, start position, ref allele, alt allele, gene hugo symbol, HGSV short, is it somatic or germline mutation. Filename: <id>.snp.vcf
+ - vcf file format for snvs with columns: chromosome, start position, ref allele, alt allele, gene hugo symbol, HGSV short, is it somatic or germline mutation. Filename: id.snp.vcf
 
         1       113854971       C       G       PTPN22  p.E207Q Somatic
 
@@ -52,7 +52,7 @@ perl neoscan.pl --rdir --log --bamfq --bed --step --rna --refdir --q --groupname
 
         1       117623561       C       G       FAM46C  p.I231M Somatic
  
- - vcf file for indels with the same columns. Filename <id>.indel.vcf
+ - vcf file for indels with the same columns. Filename id.indel.vcf
 
         3       161086280       T       -       B3GALNT1        p.T159Pfs*8     Somatic
  
