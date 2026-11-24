@@ -62,3 +62,25 @@ perl neoscan.pl --rdir /gscmnt/gc2533/dinglab/scao/cptac-neo/ccRCC/work2 --log /
 perl neoscan.pl --rdir /gscmnt/gc2533/dinglab/scao/cptac-neo/ccRCC/work3 --log /gscmnt/gc2533/dinglab/scao/cptac-neo/ccRCC.log --bam 1 --bed /gscmnt/gc2518/dinglab/scao/db/refseq_hg38_june29/proteome.bed --rna 0 --refdir /gscmnt/gc2518/dinglab/scao/db/refseq_hg38_june29 --step 4
 
 perl neoscan.pl --rdir /gscmnt/gc2533/dinglab/scao/cptac-neo/ccRCC/work4 --log /gscmnt/gc2533/dinglab/scao/cptac-neo/ccRCC.log --bam 1 --bed /gscmnt/gc2518/dinglab/scao/db/refseq_hg38_june29/proteome.bed --rna 0 --refdir /gscmnt/gc2518/dinglab/scao/db/refseq_hg38_june29 --step 4
+
+##5.
+perl neoscan.pl --rdir /gscmnt/gc2533/dinglab/scao/cptac-neo/ccRCC/work0 --log /gscmnt/gc2533/dinglab/scao/cptac-neo/ccRCC.log --bam 1 --bed /gscmnt/gc2518/dinglab/scao/db/refseq_hg38_june29/proteome.bed --rna 0 --refdir /gscmnt/gc2518/dinglab/scao/db/refseq_hg38_june29 --step 5
+
+perl neoscan.pl --rdir /gscmnt/gc2533/dinglab/scao/cptac-neo/ccRCC/work1 --log /gscmnt/gc2533/dinglab/scao/cptac-neo/ccRCC.log --bam 1 --bed /gscmnt/gc2518/dinglab/scao/db/refseq_hg38_june29/proteome.bed --rna 0 --refdir /gscmnt/gc2518/dinglab/scao/db/refseq_hg38_june29 --step 5
+
+perl neoscan.pl --rdir /gscmnt/gc2533/dinglab/scao/cptac-neo/ccRCC/work2 --log /gscmnt/gc2533/dinglab/scao/cptac-neo/ccRCC.log --bam 1 --bed /gscmnt/gc2518/dinglab/scao/db/refseq_hg38_june29/proteome.bed --rna 0 --refdir /gscmnt/gc2518/dinglab/scao/db/refseq_hg38_june29 --step 5
+
+perl neoscan.pl --rdir /gscmnt/gc2533/dinglab/scao/cptac-neo/ccRCC/work3 --log /gscmnt/gc2533/dinglab/scao/cptac-neo/ccRCC.log --bam 1 --bed /gscmnt/gc2518/dinglab/scao/db/refseq_hg38_june29/proteome.bed --rna 0 --refdir /gscmnt/gc2518/dinglab/scao/db/refseq_hg38_june29 --step 5
+
+perl neoscan.pl --rdir /gscmnt/gc2533/dinglab/scao/cptac-neo/ccRCC/work4 --log /gscmnt/gc2533/dinglab/scao/cptac-neo/ccRCC.log --bam 1 --bed /gscmnt/gc2518/dinglab/scao/db/refseq_hg38_june29/proteome.bed --rna 0 --refdir /gscmnt/gc2518/dinglab/scao/db/refseq_hg38_june29 --step 5
+
+##6.
+perl neoscan.pl --rdir /gscmnt/gc2533/dinglab/scao/cptac-neo/ccRCC/work0 --log /gscmnt/gc2533/dinglab/scao/cptac-neo/ccRCC.log --bam 1 --bed /gscmnt/gc2518/dinglab/scao/db/refseq_hg38_june29/proteome.bed --rna 0 --refdir /gscmnt/gc2518/dinglab/scao/db/refseq_hg38_june29 --step 6
+
+perl neoscan.pl --rdir /gscmnt/gc2533/dinglab/scao/cptac-neo/ccRCC/work1 --log /gscmnt/gc2533/dinglab/scao/cptac-neo/ccRCC.log --bam 1 --bed /gscmnt/gc2518/dinglab/scao/db/refseq_hg38_june29/proteome.bed --rna 0 --refdir /gscmnt/gc2518/dinglab/scao/db/refseq_hg38_june29 --step 6
+
+perl neoscan.pl --rdir /gscmnt/gc2533/dinglab/scao/cptac-neo/ccRCC/work2 --log /gscmnt/gc2533/dinglab/scao/cptac-neo/ccRCC.log --bam 1 --bed /gscmnt/gc2518/dinglab/scao/db/refseq_hg38_june29/proteome.bed --rna 0 --refdir /gscmnt/gc2518/dinglab/scao/db/refseq_hg38_june29 --step 6
+
+perl neoscan.pl --rdir /gscmnt/gc2533/dinglab/scao/cptac-neo/ccRCC/work3 --log /gscmnt/gc2533/dinglab/scao/cptac-neo/ccRCC.log --bam 1 --bed /gscmnt/gc2518/dinglab/scao/db/refseq_hg38_june29/proteome.bed --rna 0 --refdir /gscmnt/gc2518/dinglab/scao/db/refseq_hg38_june29 --step 6
+
+perl neoscan.pl --rdir /gscmnt/gc2533/dinglab/scao/cptac-neo/ccRCC/work4 --log /gscmnt/gc2533/dinglab/scao/cptac-neo/ccRCC.log --bam 1 --bed /gscmnt/gc2518/dinglab/scao/db/refseq_hg38_june29/proteome.bed --rna 0 --refdir /gscmnt/gc2518/dinglab/scao/db/refseq_hg38_june29 --step 6
